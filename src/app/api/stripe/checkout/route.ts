@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import type { Database } from "@/types/database";
+import { createClient } from "@/lib/supabase/server";
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY manquant");
@@ -17,19 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "pack_id requis" }, { status: 400 });
     }
 
-    // Auth Supabase
-    const cookieStore = await cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get:    (name: string) => cookieStore.get(name)?.value,
-          set:    (name: string, value: string, options: CookieOptions) => { try { (cookieStore as any).set({ name, value, ...options }); } catch {} },
-          remove: (name: string, options: CookieOptions) => { try { (cookieStore as any).set({ name, value: "", ...options }); } catch {} },
-        },
-      }
-    );
+    const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
