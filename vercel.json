@@ -1,0 +1,14 @@
+{
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["cdg1"],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@swiftpark_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@swiftpark_supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@swiftpark_service_role_key",
+    "NEXT_PUBLIC_APP_URL": "@swiftpark_app_url",
+    "VAPID_PUBLIC_KEY": "@swiftpark_vapid_public",
+    "VAPID_PRIVATE_KEY": "@swiftpark_vapid_private"
+  }
+}

@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Palette SwiftPark (identique au prototype) ── */
+:root {
+  --g:   #22956b;
+  --gl:  #e8f5ef;
+  --gd:  #085041;
+  --amber: #f59e0b;
+  --red:   #ef4444;
+  --blue:  #3b82f6;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f2;
+  --s:  #ffffff;
+  --s2: #f8f8f5;
+  --t:  #111111;
+  --t2: #555555;
+  --t3: #999999;
+  --b:  #e8e8e2;
+}
+
+[data-theme="dark"] {
+  --bg: #0d0d0d;
+  --s:  #1c1c1e;
+  --s2: #242426;
+  --t:  #f2f2f0;
+  --t2: #a0a09a;
+  --t3: #666666;
+  --b:  #2a2a2c;
+}
+
+@layer base {
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--t);
+  }
+
+  /* Cache la scrollbar partout */
+  ::-webkit-scrollbar { display: none; }
+}
+
+@layer utilities {
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-top    { padding-top:    env(safe-area-inset-top); }
+}
+
+/* ── Animation Leaflet markers ── */
+@keyframes pa {
+  0%,100% { box-shadow: 0 0 0 0   rgba(34,149,107,.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(34,149,107,0);  }
+}
+
+/* ── Slide-in utilisé dans les sheets ── */
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0);    }
+}
+.animate-in.slide-in-from-bottom-4 {
+  animation: slide-in-from-bottom .3s cubic-bezier(.32,1,.5,1);
+}
