@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useRealtimeSpots } from "@/hooks/useRealtimeSpots";
 import { useProfile } from "@/hooks/useProfile";
+import { useActiveSpot } from "@/hooks/useActiveSpot";
 import { useMapStore } from "@/store/useMapStore";
 import SpotSheet from "@/components/map/SpotSheet";
 import BottomNav from "@/components/ui/BottomNav";
@@ -13,6 +14,7 @@ import SearchSpotSheet from "@/components/map/SearchSpotSheet";
 import MapHeader from "@/components/map/MapHeader";
 import Onboarding from "@/components/onboarding/Onboarding";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
+import DepartBanner from "@/components/parking/DepartBanner";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), { ssr: false });
 
@@ -22,19 +24,18 @@ export default function MapClient() {
   const [showOb, setShowOb]         = useState(false);
 
   const { selectedSpot, userLat, userLng, setMapCenter, spots } = useMapStore();
+  const { activeSpot, setActiveSpot } = useActiveSpot();
 
   useProfile();
   useGeolocation();
   useRealtimeSpots();
 
-  // Vérifier si onboarding déjà vu
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("sp_ob")) {
       setShowOb(true);
     }
   }, []);
 
-  // Ouvrir share si ?share=1
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -48,13 +49,10 @@ export default function MapClient() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[var(--bg,#f5f5f2)]">
-      {/* Onboarding */}
       {showOb && <Onboarding onDone={() => setShowOb(false)} />}
 
-      {/* Carte Leaflet plein écran */}
       <MapView />
 
-      {/* Header */}
       <MapHeader
         spotsCount={spots.length}
         onLocate={handleLocate}
@@ -62,21 +60,22 @@ export default function MapClient() {
         onShare={() => setShowShare(true)}
       />
 
-      {/* Centre notifications */}
-      <div className="absolute top-[116px] right-4 z-10">
+      <div className="absolute top-[116px] right-4 z-[810]">
         <NotificationCenter />
       </div>
 
-      {/* Fiche détail d'une place */}
+      {/* Bannière "Je pars" si place active */}
+      {activeSpot && (
+        <DepartBanner
+          spot={activeSpot}
+          onDone={() => setActiveSpot(null)}
+        />
+      )}
+
       {selectedSpot && <SpotSheet />}
-
-      {/* Sheet "Je cherche" */}
       {showSearch && <SearchSpotSheet onClose={() => setShowSearch(false)} />}
+      {showShare  && <ShareSpotModal  onClose={() => setShowShare(false)} />}
 
-      {/* Modal "Je me gare" */}
-      {showShare && <ShareSpotModal onClose={() => setShowShare(false)} />}
-
-      {/* Navigation bottom */}
       <BottomNav />
     </div>
   );
