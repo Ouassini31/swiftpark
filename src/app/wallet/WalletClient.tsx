@@ -54,7 +54,13 @@ export default function WalletClient({
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pack_id: pack.id }),
+        body: JSON.stringify({
+          pack_id: pack.id,
+          name: pack.name,
+          coins: pack.coins,
+          price_eur_cents: pack.price_eur_cents,
+          bonus_pct: pack.bonus_pct,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Erreur serveur");
