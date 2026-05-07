@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
+import { haversineDistance } from "@/lib/utils";
 
-const RADIUS_KM = 2;
+const RADIUS_KM    = 2;
+const NOTIF_RADIUS = 1000; // mètres — alerte si place à moins d'1 km
 
 export function useRealtimeSpots() {
-  const { userLat, userLng, setSpots, upsertSpot, removeSpot } = useMapStore();
+  const { userLat, userLng, setSpots, upsertSpot, removeSpot, profile } = useMapStore();
 
   useEffect(() => {
     if (!userLat || !userLng) return;
@@ -30,14 +33,37 @@ export function useRealtimeSpots() {
 
     loadNearbySpots();
 
-    // Souscription temps réel
+    // ── Temps réel ──────────────────────────────────────────────────────
     const channel = supabase
       .channel("spots-realtime")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "parking_spots" },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (payload: any) => upsertSpot(payload.new as Parameters<typeof upsertSpot>[0])
+        (payload: any) => {
+          const spot = payload.new as Parameters<typeof upsertSpot>[0];
+          upsertSpot(spot);
+
+          // Notification in-app si la place est proche et pas la nôtre
+          if (!profile || spot.sharer_id === profile.id) return;
+          if (!userLat || !userLng) return;
+
+          const dist = haversineDistance(userLat, userLng, spot.lat, spot.lng);
+          if (dist <= NOTIF_RADIUS) {
+            const distStr = dist < 1000 ? `${Math.round(dist)} m` : `${(dist / 1000).toFixed(1)} km`;
+            toast(`🅿️ Place disponible à ${distStr} !`, {
+              description: spot.address?.split(",")[0] ?? "Près de toi",
+              duration: 6000,
+              action: {
+                label: "Voir",
+                onClick: () => {
+                  // Centrer la carte sur la place
+                  useMapStore.getState().setMapCenter(spot.lat, spot.lng, 16);
+                },
+              },
+            });
+          }
+        }
       )
       .on(
         "postgres_changes",
@@ -58,5 +84,5 @@ export function useRealtimeSpots() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [userLat, userLng, setSpots, upsertSpot, removeSpot]);
+  }, [userLat, userLng, setSpots, upsertSpot, removeSpot, profile]);
 }
