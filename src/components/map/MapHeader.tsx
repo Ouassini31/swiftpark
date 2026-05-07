@@ -1,8 +1,7 @@
 "use client";
 
-import { Locate, Search, MapPin } from "lucide-react";
+import { Locate, Search, MapPin, Moon, Sun } from "lucide-react";
 import { useMapStore } from "@/store/useMapStore";
-import { formatCoins } from "@/lib/utils";
 import Link from "next/link";
 import { useDarkMode } from "@/hooks/useDarkMode";
 
@@ -19,92 +18,81 @@ export default function MapHeader({ spotsCount, onLocate, onSearch, onShare }: M
 
   return (
     <div className="absolute top-0 left-0 right-0 z-[800] pointer-events-none">
-      <div className="px-4 pt-12 pb-3 pointer-events-auto">
-        {/* Ligne 1 : logo + solde + dark */}
-        <div className="flex items-center justify-between mb-2">
-          {/* Logo */}
-          <div className="flex items-center gap-2 bg-[var(--s,#fff)] rounded-2xl shadow px-3 py-2 border border-[var(--b,#e8e8e2)]">
-            <div className="w-7 h-7 bg-[#22956b] rounded-[9px] flex items-center justify-center">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <div className="px-4 pt-safe-top pt-12 pb-3 pointer-events-auto">
+
+        {/* Ligne 1 : logo + actions */}
+        <div className="flex items-center justify-between mb-2.5">
+          {/* Logo glassmorphism */}
+          <div className="flex items-center gap-2.5 bg-white/90 dark:bg-black/60 backdrop-blur-xl rounded-2xl shadow-lg px-3.5 py-2.5 border border-white/50">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#22956b] to-[#085041] rounded-[10px] flex items-center justify-center shadow-md">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
               </svg>
             </div>
-            <span className="text-sm font-bold text-[var(--t,#111)]">SwiftPark</span>
-            {spotsCount > 0 && (
-              <span className="text-[10px] text-[var(--t3,#999)] font-semibold">
-                · {spotsCount} info{spotsCount > 1 ? "s" : ""}
-              </span>
-            )}
+            <div>
+              <p className="text-[13px] font-black text-gray-900 leading-none">SwiftPark</p>
+              {spotsCount > 0 && (
+                <p className="text-[10px] text-[#22956b] font-semibold mt-0.5">
+                  {spotsCount} info{spotsCount > 1 ? "s" : ""} live
+                </p>
+              )}
+            </div>
           </div>
 
+          {/* Actions droite */}
           <div className="flex items-center gap-2">
-            {/* Solde SC */}
             {profile && (
               <Link
                 href="/wallet"
-                className="flex items-center gap-1 bg-[#e8f5ef] text-[#085041] border border-[rgba(34,149,107,.25)] rounded-full px-3 py-1.5 text-xs font-bold"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white rounded-full px-3.5 py-2 text-xs font-bold shadow-lg shadow-[#22956b]/30"
               >
-                <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd"/>
-                </svg>
+                <span className="text-yellow-300">⚡</span>
                 {profile.coin_balance} SC
               </Link>
             )}
 
-            {/* Dark mode */}
             <button
               onClick={toggle}
-              className="w-8 h-8 rounded-[9px] border border-[var(--b,#e8e8e2)] bg-[var(--s,#fff)] flex items-center justify-center shadow"
+              className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-xl border border-white/50 flex items-center justify-center shadow-lg text-gray-600"
             >
-              {isDark ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t2,#555)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                  <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t2,#555)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-              )}
+              {isDark ? <Sun className="w-4 h-4 text-yellow-500" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Localiser */}
             <button
               onClick={onLocate}
-              className="w-8 h-8 rounded-[9px] border border-[var(--b,#e8e8e2)] bg-[var(--s,#fff)] flex items-center justify-center shadow text-[#22956b]"
+              className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-xl border border-white/50 flex items-center justify-center shadow-lg text-[#22956b]"
             >
               <Locate className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Ligne 2 : 2 boutons d'action */}
-        <div className="flex gap-2">
+        {/* Ligne 2 : boutons d'action */}
+        <div className="flex gap-2.5">
           <button
             onClick={onSearch}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-[#e8f5ef] text-[#085041] border border-[rgba(34,149,107,.25)] rounded-[11px] px-3 py-2.5 text-xs font-bold"
+            className="flex-1 flex items-center justify-center gap-2 bg-white/90 backdrop-blur-xl border border-white/50 text-gray-700 rounded-2xl px-4 py-3 text-[13px] font-semibold shadow-lg transition active:scale-95"
           >
-            <Search className="w-3 h-3 shrink-0" />
+            <Search className="w-3.5 h-3.5 text-[#22956b]" />
             Je cherche une place
           </button>
           <button
             onClick={onShare}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-[#22956b] text-white rounded-[11px] px-3 py-2.5 text-xs font-bold shadow-[0_3px_12px_rgba(34,149,107,.3)]"
+            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white rounded-2xl px-4 py-3 text-[13px] font-bold shadow-lg shadow-[#22956b]/30 transition active:scale-95"
           >
-            <MapPin className="w-3 h-3 shrink-0" />
+            <MapPin className="w-3.5 h-3.5" />
             Je me gare
           </button>
         </div>
       </div>
 
-      {/* Pill "X infos disponibles" */}
+      {/* Pill flottante "X places" */}
       {spotsCount > 0 && (
-        <div className="flex justify-center pointer-events-none">
-          <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur rounded-full px-3 py-1.5 text-xs font-bold text-[#111] shadow border border-black/[.08]">
-            <span className="w-1.5 h-1.5 bg-[#22956b] rounded-full animate-pulse inline-block" />
-            {spotsCount} info{spotsCount > 1 ? "s" : ""} disponible{spotsCount > 1 ? "s" : ""}
+        <div className="flex justify-center mt-1 pointer-events-none">
+          <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-xl rounded-full px-4 py-1.5 text-xs font-bold text-gray-800 shadow-lg border border-white/50">
+            <span className="w-1.5 h-1.5 bg-[#22956b] rounded-full animate-pulse" />
+            {spotsCount} place{spotsCount > 1 ? "s" : ""} disponible{spotsCount > 1 ? "s" : ""}
           </div>
         </div>
       )}
