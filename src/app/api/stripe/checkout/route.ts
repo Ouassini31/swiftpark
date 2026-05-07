@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (!pack) return NextResponse.json({ error: "Pack introuvable" }, { status: 404 });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     const stripe = getStripe();
 
     // Créer la session Stripe Checkout
