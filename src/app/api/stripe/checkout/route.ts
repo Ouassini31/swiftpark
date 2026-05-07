@@ -3,8 +3,10 @@ import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
 function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY manquant");
-  return new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-04-22.dahlia" });
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error(`STRIPE_SECRET_KEY: ${key === undefined ? "undefined" : key === "" ? "vide" : "falsy"}`);
+  if (!key.startsWith("sk_")) throw new Error(`STRIPE_SECRET_KEY invalide (commence par: ${key.slice(0, 4)})`);
+  return new Stripe(key, { apiVersion: "2026-04-22.dahlia" });
 }
 
 export async function POST(req: NextRequest) {
