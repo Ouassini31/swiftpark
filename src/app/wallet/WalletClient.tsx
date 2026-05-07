@@ -28,6 +28,14 @@ const TX_ICONS: Record<string, string> = {
   earn: "💰", spend: "🔑", commission: "🏦", refund: "↩️", bonus: "🎁", purchase: "💳",
 };
 
+// Packs par défaut si la table n'existe pas encore en base
+const DEFAULT_PACKS: CoinPack[] = [
+  { id: "starter", name: "Starter",  coins: 50,  price_eur_cents: 199, bonus_pct: 0,  is_popular: false },
+  { id: "popular", name: "Popular",  coins: 130, price_eur_cents: 499, bonus_pct: 6,  is_popular: true  },
+  { id: "pro",     name: "Pro",      coins: 300, price_eur_cents: 999, bonus_pct: 20, is_popular: false },
+  { id: "max",     name: "Max",      coins: 700, price_eur_cents: 1999, bonus_pct: 40, is_popular: false },
+];
+
 export default function WalletClient({
   profile, transactions, packs,
 }: {
@@ -60,6 +68,7 @@ export default function WalletClient({
   }
 
   const balance = profile?.coin_balance ?? 0;
+  const displayPacks = packs.length > 0 ? packs : DEFAULT_PACKS;
 
   return (
     <div className="min-h-screen bg-[#f5f5f2] pb-28">
@@ -125,13 +134,13 @@ export default function WalletClient({
       <div className="px-4 space-y-6 mt-6">
 
         {/* ── Packs d'achat ─────────────────────────────────────── */}
-        {packs.length > 0 && (
+        {displayPacks.length > 0 && (
           <section>
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">
               Acheter des SwiftCoins
             </h2>
             <div className="grid grid-cols-2 gap-3">
-              {packs.map((pack) => (
+              {displayPacks.map((pack) => (
                 <PackCard
                   key={pack.id}
                   pack={pack}

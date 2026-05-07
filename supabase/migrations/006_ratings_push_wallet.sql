@@ -21,10 +21,8 @@ end $$;
 
 create index if not exists push_sub_user_idx on public.push_subscriptions(user_id);
 
--- ── rating columns on profiles ────────────────────────────────────────────
-alter table public.profiles
-  add column if not exists rating_avg   numeric(3,1) default 0,
-  add column if not exists rating_count integer      default 0;
+-- ── rating columns on profiles (rating + rating_count already exist from 001) ──
+-- Nothing to add, columns are already there
 
 -- ── coin_packs (Stripe products) ─────────────────────────────────────────
 create table if not exists public.coin_packs (

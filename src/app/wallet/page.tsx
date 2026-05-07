@@ -18,7 +18,8 @@ export default async function WalletPage() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
-    supabase.from("coin_packs").select("*").order("sort_order"),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from("coin_packs").select("*").order("sort_order"),
   ]);
 
   return (

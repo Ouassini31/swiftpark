@@ -44,14 +44,14 @@ export default function RatingModal({ reservationId, spotAddress, sharerId, onCl
       stars, tags,
       comment: comment.trim() || null,
     }).then(() => {});
-    // Mettre à jour le score moyen du partageur
+    // Mettre à jour la note moyenne du partageur
     const { data: existing } = await supabase
-      .from("profiles").select("rating_avg, rating_count").eq("id", sharerId).single();
+      .from("profiles").select("rating, rating_count").eq("id", sharerId).single();
     if (existing) {
       const count = (existing.rating_count ?? 0) + 1;
-      const avg   = ((existing.rating_avg ?? 0) * (count - 1) + stars) / count;
+      const avg   = ((existing.rating ?? 0) * (count - 1) + stars) / count;
       await supabase.from("profiles")
-        .update({ rating_avg: Math.round(avg * 10) / 10, rating_count: count })
+        .update({ rating: Math.round(avg * 10) / 10, rating_count: count })
         .eq("id", sharerId);
     }
     toast.success(stars >= 4 ? "Merci pour ton retour ! ⭐" : "Retour enregistré");
