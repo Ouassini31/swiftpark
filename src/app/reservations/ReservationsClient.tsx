@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { ArrowLeft, MapPin, Clock, CheckCircle, XCircle, Star } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -11,6 +12,11 @@ import RatingModal from "@/components/rating/RatingModal";
 import GpsValidation from "@/components/parking/GpsValidation";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+
+const TrackingPanel = dynamic(
+  () => import("@/components/tracking/TrackingPanel"),
+  { ssr: false }
+);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ReservationWithJoins = any;
@@ -30,6 +36,7 @@ export default function ReservationsClient({
 }) {
   const [ratingTarget, setRatingTarget] = useState<ReservationWithJoins | null>(null);
   const [gpsTarget, setGpsTarget] = useState<ReservationWithJoins | null>(null);
+  const [trackingTarget, setTrackingTarget] = useState<ReservationWithJoins | null>(null);
   const [tab, setTab] = useState<"active" | "history">("active");
 
   const active  = reservations.filter((r: ReservationWithJoins) => r.status === "reserved");
@@ -76,6 +83,7 @@ export default function ReservationsClient({
                   reservation={r}
                   currentUserId={currentUserId}
                   onValidate={() => setGpsTarget(r)}
+                  onTrack={() => setTrackingTarget(r)}
                   onCancel={async () => {
                     const supabase = createClient();
                     const res = await fetch(
@@ -118,6 +126,24 @@ export default function ReservationsClient({
         )}
       </div>
 
+      {/* Modale Tracking GPS temps réel */}
+      {trackingTarget && (
+        <div className="fixed inset-0 z-50 bg-[#f5f5f2] flex flex-col">
+          <TrackingPanel
+            reservationId={trackingTarget.id}
+            spotLat={trackingTarget.parking_spots?.lat}
+            spotLng={trackingTarget.parking_spots?.lng}
+            role={trackingTarget.finder_id === currentUserId ? "finder" : "sharer"}
+            finderName={
+              trackingTarget.finder_id === currentUserId
+                ? undefined
+                : trackingTarget.finder?.full_name ?? trackingTarget.finder?.username
+            }
+            onClose={() => setTrackingTarget(null)}
+          />
+        </div>
+      )}
+
       {/* Modale GPS */}
       {gpsTarget && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 pb-8 px-4">
@@ -150,11 +176,12 @@ export default function ReservationsClient({
 
 /* ─── Active Card ─────────────────────────────────────────── */
 function ActiveCard({
-  reservation, currentUserId, onValidate, onCancel,
+  reservation, currentUserId, onValidate, onTrack, onCancel,
 }: {
   reservation: ReservationWithJoins;
   currentUserId: string;
   onValidate: () => void;
+  onTrack: () => void;
   onCancel: () => void;
 }) {
   const { formatted, isExpired, isUrgent } = useCountdown(reservation.expires_at);
@@ -203,19 +230,27 @@ function ActiveCard({
 
         {/* Actions */}
         {!isExpired && (
-          <div className="flex gap-2 pt-1">
+          <div className="space-y-2 pt-1">
             <button
-              onClick={onCancel}
-              className="flex-1 py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50"
+              onClick={onTrack}
+              className="w-full py-2.5 bg-blue-500 text-white text-sm font-bold rounded-xl hover:bg-blue-600 flex items-center justify-center gap-2"
             >
-              Annuler
+              📍 Voir en direct
             </button>
-            <button
-              onClick={onValidate}
-              className="flex-[2] py-2.5 bg-brand-600 text-white text-sm font-bold rounded-xl hover:bg-brand-700"
-            >
-              📍 Valider ma position
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onCancel}
+                className="flex-1 py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={onValidate}
+                className="flex-[2] py-2.5 bg-brand-600 text-white text-sm font-bold rounded-xl hover:bg-brand-700"
+              >
+                ✅ Valider ma position
+              </button>
+            </div>
           </div>
         )}
       </div>
