@@ -84,10 +84,11 @@ export async function POST(req: NextRequest) {
     });
 
     // Enregistrer l'ordre pending
+    const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pack.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any).from("stripe_orders").insert({
       user_id:           user.id,
-      pack_id:           pack.id,
+      pack_id:           isRealUuid ? pack.id : null,
       stripe_session_id: session.id,
       status:            "pending",
       coins:             pack.coins,
