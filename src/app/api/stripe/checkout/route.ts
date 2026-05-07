@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
             product_data: {
               name: `SwiftCoins — Pack ${pack.name}`,
               description: `${pack.coins} SC${pack.bonus_pct > 0 ? ` (+${pack.bonus_pct}% bonus)` : ""}`,
-              images: [`${appUrl}/icon-512.png`],
             },
           },
           quantity: 1,
