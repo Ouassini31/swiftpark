@@ -7,6 +7,7 @@ import { fr } from "date-fns/locale";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
 import { haversineDistance } from "@/lib/utils";
+import { notifyUser } from "@/lib/notify";
 import { toast } from "sonner";
 
 const HORIZON = [
@@ -65,7 +66,18 @@ export default function SpotSheet() {
       p_reservation_id: reservation.id,
     });
     await supabase.from("parking_spots").update({ status: "reserved" }).eq("id", selectedSpot!.id);
-    toast.success("✓ Info achetée !");
+
+    // Notifier le Sharer que sa place est réservée
+    notifyUser({
+      user_id:        selectedSpot!.sharer_id,
+      type:           "reservation_received",
+      title:          "🚗 Ta place est réservée !",
+      message:        "Un finder arrive vers toi. Prépare-toi à partir dès qu'il est là.",
+      reservation_id: reservation.id,
+      url:            "/reservations",
+    });
+
+    toast.success("✓ Info achetée ! Dirige-toi vers la place 📍");
     selectSpot(null);
     setLoading(false);
   }

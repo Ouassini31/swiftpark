@@ -5,6 +5,7 @@ import { MapPin, LogOut, CheckCircle, Loader2, X, Clock } from "lucide-react";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
 import { haversineDistance, GPS_VALIDATION_RADIUS_M } from "@/lib/utils";
+import { notifyUser } from "@/lib/notify";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
 
@@ -84,6 +85,26 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
         p_type: "earn",
         p_description: `Gain place partagée · ${reservation.sharer_receive} SC`,
         p_reservation_id: reservation.id,
+      });
+
+      // Notifier le Finder que le Sharer part
+      notifyUser({
+        user_id:        reservation.finder_id,
+        type:           "spot_validated",
+        title:          "🏃 Le partageur part maintenant !",
+        message:        `La place se libère ! Dépêche-toi d'arriver.`,
+        reservation_id: reservation.id,
+        url:            "/map",
+      });
+
+      // Notifier le Sharer de ses gains
+      notifyUser({
+        user_id:        profile.id,
+        type:           "payment_received",
+        title:          `✅ +${reservation.sharer_receive} SC reçus !`,
+        message:        `Merci d'avoir partagé ta place. Tes SwiftCoins sont crédités.`,
+        reservation_id: reservation.id,
+        url:            "/wallet",
       });
 
       toast.success(`✅ Bravo ! Tu gagnes ${reservation.sharer_receive} SC`);
