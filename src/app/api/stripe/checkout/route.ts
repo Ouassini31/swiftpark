@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Auth Supabase
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
