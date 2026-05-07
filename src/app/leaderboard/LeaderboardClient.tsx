@@ -33,17 +33,17 @@ export default function LeaderboardClient({
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 pt-12 pb-6 px-5">
+      <div className="bg-gradient-to-br from-[#22956b] to-[#1a7a58] pt-12 pb-6 px-5">
         <div className="flex items-center gap-3 mb-5">
-          <Link href="/map" className="p-2 bg-white/10 rounded-xl text-white">
+          <Link href="/map" className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
             <h1 className="text-white font-black text-xl flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-swiftcoin-400" />
+              <Trophy className="w-5 h-5 text-yellow-300 fill-yellow-300" />
               Leaderboard
             </h1>
-            <p className="text-white/50 text-xs">Top conducteurs SwiftPark</p>
+            <p className="text-white/60 text-xs">Top conducteurs SwiftPark</p>
           </div>
         </div>
 
@@ -65,7 +65,7 @@ export default function LeaderboardClient({
 
       {/* Ma position */}
       {myRank > 0 && currentProfile && (
-        <div className="mx-4 -mt-3 mb-4 bg-brand-600 rounded-2xl px-4 py-3 flex items-center justify-between shadow-lg">
+        <div className="mx-4 -mt-3 mb-4 bg-[#22956b] rounded-2xl px-4 py-3 flex items-center justify-between shadow-lg shadow-[#22956b]/30">
           <div className="flex items-center gap-2">
             <Medal className="w-4 h-4 text-white" />
             <span className="text-white text-sm font-bold">Ma position</span>

@@ -270,6 +270,69 @@ export interface Database {
           is_read?: boolean;
         };
       };
+      coin_packs: {
+        Row: {
+          id: string;
+          name: string;
+          coins: number;
+          price_eur_cents: number;
+          stripe_price_id: string | null;
+          bonus_pct: number;
+          is_popular: boolean;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          coins: number;
+          price_eur_cents: number;
+          stripe_price_id?: string | null;
+          bonus_pct?: number;
+          is_popular?: boolean;
+          sort_order?: number;
+        };
+        Update: Partial<{ id: string; name: string; coins: number; price_eur_cents: number; stripe_price_id: string | null; bonus_pct: number; is_popular: boolean; sort_order: number; }>;
+      };
+      stripe_orders: {
+        Row: {
+          id: string;
+          user_id: string;
+          pack_id: string | null;
+          stripe_session_id: string | null;
+          stripe_payment_intent: string | null;
+          status: "pending" | "paid" | "failed" | "refunded";
+          coins: number;
+          amount_eur_cents: number;
+          created_at: string;
+          paid_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          pack_id?: string | null;
+          stripe_session_id?: string | null;
+          stripe_payment_intent?: string | null;
+          status?: "pending" | "paid" | "failed" | "refunded";
+          coins: number;
+          amount_eur_cents: number;
+          paid_at?: string | null;
+        };
+        Update: Partial<{ stripe_payment_intent: string | null; status: "pending" | "paid" | "failed" | "refunded"; paid_at: string | null; }>;
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          subscription: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          subscription: Json;
+        };
+        Update: Partial<{ subscription: Json }>;
+      };
     };
     Views: {
       daily_transactions: {

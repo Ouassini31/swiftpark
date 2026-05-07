@@ -1,132 +1,100 @@
 "use client";
 
 import { useState } from "react";
-import { Star, X } from "lucide-react";
+import { Star, X, ThumbsUp, ThumbsDown } from "lucide-react";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
 import { toast } from "sonner";
-import type { Database } from "@/types/database";
-
-type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
+import { cn } from "@/lib/utils";
 
 interface RatingModalProps {
-  reservation: Reservation;
-  ratedName: string;
-  role: "sharer" | "finder"; // rôle de la personne à noter
+  reservationId: string;
+  spotAddress?: string | null;
+  sharerId: string;
   onClose: () => void;
 }
 
-export default function RatingModal({ reservation, ratedName, role, onClose }: RatingModalProps) {
-  const profile = useMapStore((s) => s.profile);
-  const [score, setScore] = useState(0);
+const TAGS_GOOD = ["Exact 📍", "Rapide ⚡", "Bien expliqué 👌", "Spot facile 🚗"];
+const TAGS_BAD  = ["Déjà pris 😤", "Mauvaise adresse 🗺️", "Trop loin 📏", "Expiré ⏰"];
+
+export default function RatingModal({ reservationId, spotAddress, sharerId, onClose }: RatingModalProps) {
+  const { profile } = useMapStore();
+  const [stars, setStars]     = useState(0);
   const [hovered, setHovered] = useState(0);
+  const [tags, setTags]       = useState<string[]>([]);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit() {
-    if (score === 0) {
-      toast.error("Choisissez une note");
-      return;
-    }
-    if (!profile) return;
+  const isGood = stars >= 4;
+  const availableTags = stars > 0 ? (isGood ? TAGS_GOOD : TAGS_BAD) : [];
 
+  function toggleTag(tag: string) {
+    setTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+  }
+
+  async function handleSubmit() {
+    if (stars === 0) { toast.error("Donne au moins 1 étoile"); return; }
+    if (!profile) return;
     setLoading(true);
     const supabase = createClient();
-
-    const ratedId = role === "sharer" ? reservation.sharer_id : reservation.finder_id;
-
-    const { error } = await supabase.from("ratings").insert({
-      reservation_id: reservation.id,
+    await supabase.from("ratings").insert({
+      reservation_id: reservationId,
       rater_id: profile.id,
-      rated_id: ratedId,
-      score,
+      rated_id: sharerId,
+      stars, tags,
       comment: comment.trim() || null,
-    });
-
-    if (error) {
-      if (error.code === "23505") {
-        toast.info("Vous avez déjà noté cette transaction");
-      } else {
-        toast.error("Erreur lors de la notation");
-      }
-      setLoading(false);
-      return;
+    }).then(() => {});
+    // Mettre à jour le score moyen du partageur
+    const { data: existing } = await supabase
+      .from("profiles").select("rating_avg, rating_count").eq("id", sharerId).single();
+    if (existing) {
+      const count = (existing.rating_count ?? 0) + 1;
+      const avg   = ((existing.rating_avg ?? 0) * (count - 1) + stars) / count;
+      await supabase.from("profiles")
+        .update({ rating_avg: Math.round(avg * 10) / 10, rating_count: count })
+        .eq("id", sharerId);
     }
-
-    toast.success("Merci pour votre évaluation ⭐");
+    toast.success(stars >= 4 ? "Merci pour ton retour ! ⭐" : "Retour enregistré");
     onClose();
   }
 
-  const LABELS = ["", "Mauvais", "Passable", "Bien", "Très bien", "Excellent !"];
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-lg font-black text-gray-900">Évaluer</h2>
-            <p className="text-sm text-gray-500">{ratedName}</p>
+    <>
+      <div className="absolute inset-0 z-[900] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 z-[910] bg-white rounded-t-[28px] shadow-[0_-20px_60px_rgba(0,0,0,.15)] animate-in slide-in-from-bottom-4">
+        <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-gray-200 rounded-full" /></div>
+        <div className="px-5 pb-10 pt-2">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-black text-gray-900">Évalue l&apos;info</h2>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><X className="w-4 h-4" /></button>
           </div>
-          <button onClick={onClose} className="p-2 bg-gray-100 rounded-xl">
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
-        </div>
-
-        {/* Étoiles */}
-        <div className="flex justify-center gap-3 mb-3">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <button
-              key={s}
-              onClick={() => setScore(s)}
-              onMouseEnter={() => setHovered(s)}
-              onMouseLeave={() => setHovered(0)}
-              className="transition-transform active:scale-110"
-            >
-              <Star
-                className={`w-10 h-10 transition-colors ${
-                  s <= (hovered || score)
-                    ? "fill-swiftcoin-400 text-swiftcoin-400 scale-110"
-                    : "text-gray-200"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-
-        {/* Label dynamique */}
-        <p className="text-center text-sm font-semibold text-brand-600 mb-5 h-5">
-          {LABELS[hovered || score]}
-        </p>
-
-        {/* Commentaire */}
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Un commentaire ? (optionnel)"
-          rows={3}
-          maxLength={200}
-          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm resize-none mb-4"
-        />
-
-        {/* Boutons */}
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 bg-gray-100 text-gray-600 font-semibold rounded-2xl text-sm"
-          >
-            Plus tard
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading || score === 0}
-            className="flex-2 flex-[2] py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold
-              rounded-2xl text-sm transition disabled:opacity-40"
-          >
-            {loading ? "Envoi…" : "Envoyer"}
+          {spotAddress && <p className="text-xs text-gray-400 mb-5">{spotAddress.split(",").slice(0, 2).join(",")}</p>}
+          <div className="flex justify-center gap-2 mb-5">
+            {[1,2,3,4,5].map((s) => (
+              <button key={s} onClick={() => { setStars(s); setTags([]); }} onMouseEnter={() => setHovered(s)} onMouseLeave={() => setHovered(0)} className="transition active:scale-90">
+                <Star className={cn("w-10 h-10 transition-colors", s <= (hovered || stars) ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200")} />
+              </button>
+            ))}
+          </div>
+          {stars > 0 && (
+            <div className={cn("flex items-center justify-center gap-2 py-2 px-4 rounded-2xl mx-auto w-fit mb-4 text-sm font-bold", isGood ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600")}>
+              {isGood ? <ThumbsUp className="w-4 h-4" /> : <ThumbsDown className="w-4 h-4" />}
+              {stars===5?"Parfait !":stars===4?"Très bien":stars===3?"Correct":stars===2?"Décevant":"Mauvais"}
+            </div>
+          )}
+          {availableTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center mb-4">
+              {availableTags.map((tag) => (
+                <button key={tag} onClick={() => toggleTag(tag)} className={cn("px-3 py-1.5 rounded-full text-xs font-semibold border transition active:scale-95", tags.includes(tag) ? "bg-[#22956b] text-white border-[#22956b]" : "bg-gray-50 text-gray-600 border-gray-200")}>{tag}</button>
+              ))}
+            </div>
+          )}
+          {stars > 0 && <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Un commentaire ? (optionnel)" rows={2} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm text-gray-900 outline-none focus:border-[#22956b] resize-none mb-4 transition" />}
+          <button onClick={handleSubmit} disabled={stars===0||loading} className="w-full py-4 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-bold rounded-2xl text-sm shadow-lg shadow-[#22956b]/30 disabled:opacity-40 transition active:scale-[.98]">
+            {loading ? "Envoi…" : "Envoyer mon avis"}
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

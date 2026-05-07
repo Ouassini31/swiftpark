@@ -137,13 +137,9 @@ export default function ReservationsClient({
       {/* Modale Rating */}
       {ratingTarget && (
         <RatingModal
-          reservation={ratingTarget}
-          ratedName={
-            ratingTarget.finder_id === currentUserId
-              ? ratingTarget.sharer?.full_name ?? ratingTarget.sharer?.username
-              : ratingTarget.finder?.full_name ?? ratingTarget.finder?.username
-          }
-          role={ratingTarget.finder_id === currentUserId ? "sharer" : "finder"}
+          reservationId={ratingTarget.id}
+          spotAddress={ratingTarget.parking_spot?.address ?? ratingTarget.spot?.address ?? null}
+          sharerId={ratingTarget.sharer_id}
           onClose={() => setRatingTarget(null)}
         />
       )}
