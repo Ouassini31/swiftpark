@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Star, MapPin, LogOut, Edit2, Check,
-  Zap, Trophy, TrendingUp, Wallet, ChevronRight, Loader2,
+  Zap, Trophy, TrendingUp, Wallet, ChevronRight, Loader2, FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -202,6 +202,13 @@ export default function ProfileClient({
             label="Classement"
             sub="Voir ton rang"
             bg="bg-yellow-50"
+          />
+          <QuickLink
+            href="/legal"
+            icon={<FileText className="w-5 h-5 text-gray-500" />}
+            label="Mentions légales & CGU"
+            sub="Politique de confidentialité"
+            bg="bg-gray-100"
           />
         </section>
 
