@@ -36,13 +36,12 @@ create table if not exists public.coin_packs (
   sort_order      integer default 0
 );
 
--- Seed packs
+-- Seed packs (1 SC = 1€)
 insert into public.coin_packs (name, coins, price_eur_cents, bonus_pct, is_popular, sort_order)
 values
-  ('Starter',  50,  199, 0,  false, 1),
-  ('Popular', 130,  499, 6,  true,  2),
-  ('Pro',     300, 999, 20, false, 3),
-  ('Max',     700, 1999, 40, false, 4)
+  ('Starter', 10, 1000, 0,  false, 1),
+  ('Pro',     25, 2375, 5,  true,  2),
+  ('Max',     50, 4500, 10, false, 3)
 on conflict do nothing;
 
 alter table public.coin_packs enable row level security;

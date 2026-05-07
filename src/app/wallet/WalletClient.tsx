@@ -30,10 +30,9 @@ const TX_ICONS: Record<string, string> = {
 
 // Packs par défaut si la table n'existe pas encore en base
 const DEFAULT_PACKS: CoinPack[] = [
-  { id: "starter", name: "Starter",  coins: 50,  price_eur_cents: 199, bonus_pct: 0,  is_popular: false },
-  { id: "popular", name: "Popular",  coins: 130, price_eur_cents: 499, bonus_pct: 6,  is_popular: true  },
-  { id: "pro",     name: "Pro",      coins: 300, price_eur_cents: 999, bonus_pct: 20, is_popular: false },
-  { id: "max",     name: "Max",      coins: 700, price_eur_cents: 1999, bonus_pct: 40, is_popular: false },
+  { id: "starter", name: "Starter", coins: 10, price_eur_cents: 1000, bonus_pct: 0,  is_popular: false },
+  { id: "pro",     name: "Pro",     coins: 25, price_eur_cents: 2375, bonus_pct: 5,  is_popular: true  },
+  { id: "max",     name: "Max",     coins: 50, price_eur_cents: 4500, bonus_pct: 10, is_popular: false },
 ];
 
 export default function WalletClient({
