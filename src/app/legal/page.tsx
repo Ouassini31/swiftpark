@@ -41,8 +41,8 @@ function Sub({ title, children }: { title: string; children: React.ReactNode }) 
   );
 }
 
-function P({ children }: { children: React.ReactNode }) {
-  return <p>{children}</p>;
+function P({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={className}>{children}</p>;
 }
 
 function Ul({ items }: { items: string[] }) {
