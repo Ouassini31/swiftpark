@@ -4,14 +4,15 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
 
-// Config VAPID
-webpush.setVapidDetails(
-  "mailto:contact@swiftpark.app",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
 export async function POST(req: NextRequest) {
+  // Config VAPID (lazy — évite l'erreur au build si les clés sont absentes)
+  if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+      "mailto:contact@swiftpark.app",
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+  }
   try {
     const body = await req.json();
     const { spot_id, title, message, url = "/map" } = body;
