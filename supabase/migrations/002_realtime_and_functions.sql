@@ -64,8 +64,8 @@ begin
     new.sharer_id,
     new.id,
     'reservation_received',
-    '🚗 Votre place a été réservée !',
-    'Un conducteur arrive. Préparez-vous à valider.'
+    '👀 Ton info a été achetée !',
+    'Un conducteur se dirige vers toi. Prépare-toi à partir.'
   );
 
   -- Notifier le finder
@@ -74,8 +74,8 @@ begin
     new.finder_id,
     new.id,
     'reservation_confirmed',
-    '✅ Réservation confirmée !',
-    'Rendez-vous sur place et validez votre arrivée GPS.'
+    '✅ Info confirmée !',
+    'Dirige-toi vers la place et valide ton arrivée GPS.'
   );
 
   return new;

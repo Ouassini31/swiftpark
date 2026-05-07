@@ -86,19 +86,19 @@ Deno.serve(async (req) => {
       user_id: reservation.finder_id,
       reservation_id,
       type: "reservation_cancelled",
-      title: "❌ Réservation annulée",
+      title: "❌ Échange annulé",
       body: refundAmount > 0
-        ? `${refundAmount} SC remboursés sur votre compte.`
+        ? `${refundAmount} SC remboursés sur ton compte.`
         : "Aucun remboursement (annulation tardive).",
     },
     {
       user_id: reservation.sharer_id,
       reservation_id,
       type: "reservation_cancelled",
-      title: "❌ Réservation annulée",
+      title: "❌ Échange annulé",
       body: cancelledByFinder
-        ? "Le conducteur a annulé. Votre place est de nouveau visible."
-        : "Vous avez annulé la réservation.",
+        ? "Le conducteur a annulé. Ton info est de nouveau visible."
+        : "Tu as annulé l'échange.",
     },
   ]);
 

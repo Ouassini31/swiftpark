@@ -45,7 +45,7 @@ export default function ReservationsClient({
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-black text-white text-xl">Mes réservations</h1>
+          <h1 className="font-black text-white text-xl">Mes échanges d&apos;info</h1>
         </div>
 
         {/* Tabs */}
@@ -68,7 +68,7 @@ export default function ReservationsClient({
         {tab === "active" && (
           <>
             {active.length === 0 ? (
-              <EmptyState message="Aucune réservation active" sub="Trouvez une place sur la carte !" />
+              <EmptyState message="Aucun échange en cours" sub="Trouvez une info sur la carte !" />
             ) : (
               active.map((r: ReservationWithJoins) => (
                 <ActiveCard
@@ -187,7 +187,7 @@ function ActiveCard({
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-700">
-              {isFinder ? "Partagé par" : "Réservé par"} {other?.full_name ?? other?.username}
+              {isFinder ? "Info de" : "Conducteur"} {other?.full_name ?? other?.username}
             </p>
             {other?.rating && (
               <p className="text-xs text-gray-400 flex items-center gap-0.5">

@@ -59,20 +59,20 @@ export default function SpotSheet() {
         status: "reserved",
         expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
       }).select().single();
-    if (error) { toast.error("Erreur lors de la contribution"); setLoading(false); return; }
+    if (error) { toast.error("Erreur lors de l'achat d'info"); setLoading(false); return; }
     await supabase.rpc("process_coin_transaction", {
       p_user_id: profile.id, p_amount: -selectedSpot!.coin_price,
-      p_type: "spend", p_description: `Contribution · ${selectedSpot!.address ?? "Place"}`,
+      p_type: "spend", p_description: `Info achetée · ${selectedSpot!.address ?? "Place"}`,
       p_reservation_id: reservation.id,
     });
     await supabase.from("parking_spots").update({ status: "reserved" }).eq("id", selectedSpot!.id);
 
-    // Notifier le Sharer que sa place est réservée
+    // Notifier le Sharer qu'un conducteur a vu son info
     notifyUser({
       user_id:        selectedSpot!.sharer_id,
       type:           "reservation_received",
-      title:          "🚗 Ta place est réservée !",
-      message:        "Un finder arrive vers toi. Prépare-toi à partir dès qu'il est là.",
+      title:          "👀 Ton info a été achetée !",
+      message:        "Un conducteur se dirige vers toi. Prépare-toi à partir.",
       reservation_id: reservation.id,
       url:            "/reservations",
     });
@@ -165,12 +165,12 @@ export default function SpotSheet() {
               disabled={loading || !profile || profile.coin_balance < selectedSpot.coin_price}
               className="flex-[2] py-3.5 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#22956b]/30 disabled:opacity-40 transition active:scale-[.98]"
             >
-              {loading ? "…" : `Contribuer · ${selectedSpot.coin_price} SC`}
+              {loading ? "…" : `Accéder à l'info · ${selectedSpot.coin_price} SC`}
             </button>
           </div>
 
           <p className="text-[11px] text-gray-400 text-center mt-3">
-            ℹ️ Tu contribues pour l'information, pas pour la place
+            ℹ️ Tu achètes une information, pas une place de parking
           </p>
         </div>
       </div>
