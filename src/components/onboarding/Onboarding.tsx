@@ -8,18 +8,28 @@ const SLIDES = [
     bg: "bg-[#e8f5ef]",
     title: "Trouver une place\nen secondes",
     desc: "Vois en temps réel les conducteurs qui vont libérer une place près de ta destination.",
+    pushSlide: false,
   },
   {
     emoji: "💰",
     bg: "bg-yellow-50",
     title: "Partage l'info,\nreçois une récompense",
     desc: "Tu quittes une place ? Partage l'information. Un conducteur te récompense en SwiftCoins.",
+    pushSlide: false,
   },
   {
     emoji: "⚡",
     bg: "bg-purple-50",
     title: "Le cycle parfait",
     desc: "Tu trouves une place → tu la partages quand tu pars → tu reçois une récompense.",
+    pushSlide: false,
+  },
+  {
+    emoji: "🔔",
+    bg: "bg-blue-50",
+    title: "Sois alerté\nen temps réel",
+    desc: "Active les notifications pour être prévenu immédiatement dès qu'une place est disponible près de toi.",
+    pushSlide: true,
   },
 ];
 
@@ -60,6 +70,17 @@ export default function Onboarding({ onDone }: OnboardingProps) {
 
   const slide = SLIDES[current];
   const isLast = current === SLIDES.length - 1;
+  const isPushSlide = slide.pushSlide;
+
+  async function handleEnableNotifs() {
+    try {
+      if ("Notification" in window && "serviceWorker" in navigator) {
+        await navigator.serviceWorker.register("/sw.js").catch(() => {});
+        await Notification.requestPermission();
+      }
+    } catch { /* silently fail */ }
+    handleDone();
+  }
 
   return (
     <div
@@ -110,18 +131,37 @@ export default function Onboarding({ onDone }: OnboardingProps) {
 
       {/* Boutons */}
       <div className="px-5 pb-8 flex gap-2.5">
-        <button
-          onClick={handleDone}
-          className="flex-1 py-3.5 rounded-[14px] font-bold text-sm bg-[var(--s2,#f8f8f5)] text-[var(--t2,#555)] border border-[var(--b,#e8e8e2)]"
-        >
-          Passer
-        </button>
-        <button
-          onClick={next}
-          className="flex-[2] py-3.5 rounded-[14px] font-bold text-sm bg-[#22956b] text-white shadow-[0_3px_12px_rgba(34,149,107,.3)]"
-        >
-          {isLast ? "C'est parti !" : "Suivant →"}
-        </button>
+        {isPushSlide ? (
+          <>
+            <button
+              onClick={handleDone}
+              className="flex-1 py-3.5 rounded-[14px] font-bold text-sm bg-[var(--s2,#f8f8f5)] text-[var(--t2,#555)] border border-[var(--b,#e8e8e2)]"
+            >
+              Plus tard
+            </button>
+            <button
+              onClick={handleEnableNotifs}
+              className="flex-[2] py-3.5 rounded-[14px] font-bold text-sm bg-[#22956b] text-white shadow-[0_3px_12px_rgba(34,149,107,.3)]"
+            >
+              Activer 🔔
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={handleDone}
+              className="flex-1 py-3.5 rounded-[14px] font-bold text-sm bg-[var(--s2,#f8f8f5)] text-[var(--t2,#555)] border border-[var(--b,#e8e8e2)]"
+            >
+              Passer
+            </button>
+            <button
+              onClick={next}
+              className="flex-[2] py-3.5 rounded-[14px] font-bold text-sm bg-[#22956b] text-white shadow-[0_3px_12px_rgba(34,149,107,.3)]"
+            >
+              {isLast ? "C'est parti !" : "Suivant →"}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

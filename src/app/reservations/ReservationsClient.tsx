@@ -36,31 +36,32 @@ export default function ReservationsClient({
   const history = reservations.filter((r: ReservationWithJoins) => r.status !== "reserved");
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f5f5f2] pb-24">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 pt-12 pb-0 px-5">
-        <div className="flex items-center gap-3 mb-4">
-          <Link href="/map" className="p-2 bg-gray-100 rounded-xl text-gray-600">
+      <div className="bg-gradient-to-br from-[#22956b] to-[#1a7a58] pt-12 pb-5 px-5">
+        <div className="flex items-center gap-3 mb-5">
+          <Link href="/map"
+            className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-black text-gray-900 text-xl">Mes réservations</h1>
+          <h1 className="font-black text-white text-xl">Mes réservations</h1>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-white/20 rounded-xl p-1">
           {(["active", "history"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${
-                tab === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-400"
+                tab === t ? "bg-white text-[#22956b] shadow-sm" : "text-white/70"
               }`}
             >
               {t === "active" ? `En cours (${active.length})` : `Historique (${history.length})`}
             </button>
           ))}
         </div>
-        <div className="h-4" />
       </div>
 
       <div className="px-4 mt-4 space-y-3">

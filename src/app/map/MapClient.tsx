@@ -6,6 +6,7 @@ import { useGeolocation } from "@/hooks/useGeolocation";
 import { useRealtimeSpots } from "@/hooks/useRealtimeSpots";
 import { useProfile } from "@/hooks/useProfile";
 import { useActiveSpot } from "@/hooks/useActiveSpot";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useMapStore } from "@/store/useMapStore";
 import SpotSheet from "@/components/map/SpotSheet";
 import BottomNav from "@/components/ui/BottomNav";
@@ -29,6 +30,7 @@ export default function MapClient() {
   useProfile();
   useGeolocation();
   useRealtimeSpots();
+  usePushNotifications(); // Enregistre SW en arrière-plan
 
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("sp_ob")) {
