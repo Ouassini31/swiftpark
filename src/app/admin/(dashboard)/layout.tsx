@@ -6,7 +6,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/admin/login");
 
   const { data: profileRaw } = await supabase
     .from("profiles")
@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const profile = profileRaw as { role: string; username: string; full_name: string } | null;
 
-  if (!profile || profile.role !== "admin") redirect("/map");
+  if (!profile || profile.role !== "admin") redirect("/admin/login");
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
