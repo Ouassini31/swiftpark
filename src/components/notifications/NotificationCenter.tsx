@@ -79,7 +79,7 @@ export default function NotificationCenter() {
     <>
       {/* Bouton cloche */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { setOpen(true); if (unreadCount > 0) markAllRead(); }}
         className="relative p-3 bg-white rounded-2xl shadow-lg text-gray-600 active:scale-95 transition"
       >
         <Bell className="w-5 h-5" />
