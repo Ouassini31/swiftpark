@@ -6,7 +6,6 @@ import type { Database } from "@/types/database";
 
 type Spot = Database["public"]["Tables"]["parking_spots"]["Row"];
 
-// Couleurs par horizon (identiques au prototype)
 const HORIZON_COLOR: Record<string, string> = {
   now: "#22956b",
   "15": "#f59e0b",
@@ -29,118 +28,106 @@ function getEta(expiresAt: string): string {
   return `${Math.round(mins / 60)}h`;
 }
 
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+const STYLE_LIGHT  = "mapbox://styles/mapbox/streets-v12";
+const STYLE_DARK   = "mapbox://styles/mapbox/dark-v11";
+
 export default function MapView() {
   const mapContainer = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapRef    = useRef<any>(null);
+  const mapRef     = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markersRef = useRef<Map<string, any>>(new Map());
 
   const { mapLat, mapLng, mapZoom, userLat, userLng, spots, selectSpot } = useMapStore();
 
-  // Initialisation Leaflet (client-only)
+  // Init Mapbox
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || mapRef.current) return;
 
-    // Flag d'annulation pour gérer le double-mount React Strict Mode :
-    // si le cleanup s'exécute avant que init() termine, on détruit la carte aussitôt.
     let cancelled = false;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let obs: any = null;
 
     async function init() {
-      const L = (await import("leaflet")).default;
-
-      // Si le cleanup a déjà été appelé, on n'initialise pas
+      const mapboxgl = (await import("mapbox-gl")).default;
       if (cancelled || !mapContainer.current) return;
 
-      // Nettoie toute instance Leaflet résiduelle sur ce container
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const container = mapContainer.current as any;
-      if (container._leaflet_id) {
-        try { container._leaflet_map?.remove(); } catch { /* ignoré */ }
-        delete container._leaflet_id;
-      }
+      mapboxgl.accessToken = MAPBOX_TOKEN;
 
       const isDark = document.documentElement.dataset.theme === "dark";
 
-      const map = L.map(mapContainer.current, {
-        zoomControl: false,
-        attributionControl: true,
-      }).setView([mapLat, mapLng], mapZoom);
+      const map = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: isDark ? STYLE_DARK : STYLE_LIGHT,
+        center: [mapLng, mapLat],
+        zoom: mapZoom,
+        attributionControl: false,
+      });
 
-      // Deuxième vérification post-await : le cleanup peut survenir entre les awaits
-      if (cancelled) {
-        try { map.remove(); } catch { /* ignoré */ }
-        return;
-      }
-
-      container._leaflet_map = map;
-
-      const tileUrl = isDark
-        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-
-      L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(map);
       mapRef.current = map;
 
-      // Mise à jour des tuiles au changement de thème
-      obs = new MutationObserver(() => {
+      // Changer style au changement de thème
+      const obs = new MutationObserver(() => {
         if (!mapRef.current) return;
         const dark = document.documentElement.dataset.theme === "dark";
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mapRef.current.eachLayer((l: any) => { if (l._url) mapRef.current!.removeLayer(l); });
-        L.tileLayer(
-          dark
-            ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          { maxZoom: 19 }
-        ).addTo(mapRef.current);
+        mapRef.current.setStyle(dark ? STYLE_DARK : STYLE_LIGHT);
       });
       obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+      map.on("remove", () => obs.disconnect());
     }
 
     init();
 
     return () => {
       cancelled = true;
-      if (obs) { try { obs.disconnect(); } catch { /* ignoré */ } obs = null; }
-      if (mapRef.current) { try { mapRef.current.remove(); } catch { /* ignoré */ } mapRef.current = null; }
+      if (mapRef.current) {
+        try { mapRef.current.remove(); } catch { /* ignoré */ }
+        mapRef.current = null;
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Marqueur utilisateur (point bleu pulsé)
   useEffect(() => {
     if (!mapRef.current || !userLat || !userLng) return;
+
     (async () => {
-      const L = (await import("leaflet")).default;
+      const mapboxgl = (await import("mapbox-gl")).default;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const existing = (mapRef.current as any)._userMarker;
       if (existing) existing.remove();
 
       const el = document.createElement("div");
-      el.className = "user-dot";
-      el.style.cssText =
-        "width:16px;height:16px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 8px rgba(59,130,246,.18)";
+      el.style.cssText = [
+        "width:18px", "height:18px",
+        "background:#3b82f6",
+        "border:3px solid #fff",
+        "border-radius:50%",
+        "box-shadow:0 0 0 8px rgba(59,130,246,.2)",
+      ].join(";");
 
-      const icon = L.divIcon({ html: el, className: "", iconSize: [16, 16], iconAnchor: [8, 8] });
-      const m = L.marker([userLat, userLng], { icon }).addTo(mapRef.current);
-      (mapRef.current as any)._userMarker = m;
-      mapRef.current.flyTo([userLat, userLng], 15, { duration: 1.2 });
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([userLng, userLat])
+        .addTo(mapRef.current);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mapRef.current as any)._userMarker = marker;
+      mapRef.current.flyTo({ center: [userLng, userLat], zoom: 15, duration: 1200 });
     })();
   }, [userLat, userLng]);
 
   // Centrer la carte
   useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.setView([mapLat, mapLng], mapZoom, { animate: true, duration: 0.6 });
+    mapRef.current.easeTo({ center: [mapLng, mapLat], zoom: mapZoom, duration: 600 });
   }, [mapLat, mapLng, mapZoom]);
 
   // Marqueurs des places
   const createMarker = useCallback(
     async (spot: Spot) => {
       if (!mapRef.current) return;
-      const L = (await import("leaflet")).default;
+      const mapboxgl = (await import("mapbox-gl")).default;
 
       const horizon = getHorizon(spot.expires_at);
       const color   = HORIZON_COLOR[horizon];
@@ -150,20 +137,25 @@ export default function MapView() {
       el.style.cssText = [
         `background:${color}`,
         "color:#fff",
-        "border-radius:12px",
-        "padding:5px 10px",
-        "font-size:11px",
+        "border-radius:20px",
+        "padding:6px 12px",
+        "font-size:12px",
         "font-weight:800",
         "white-space:nowrap",
-        "box-shadow:0 3px 10px rgba(0,0,0,.25)",
+        "box-shadow:0 4px 12px rgba(0,0,0,.25)",
         "cursor:pointer",
-        "position:relative",
+        "border:2px solid rgba(255,255,255,.3)",
+        "transition:transform .15s",
       ].join(";");
       el.textContent = `${spot.coin_price} SC · ${eta}`;
+      el.addEventListener("mouseenter", () => { el.style.transform = "scale(1.08)"; });
+      el.addEventListener("mouseleave", () => { el.style.transform = "scale(1)"; });
       el.addEventListener("click", () => selectSpot(spot));
 
-      const icon = L.divIcon({ html: el, className: "", iconAnchor: [36, 28] });
-      const marker = L.marker([spot.lat, spot.lng], { icon }).addTo(mapRef.current);
+      const marker = new mapboxgl.Marker({ element: el, anchor: "bottom" })
+        .setLngLat([spot.lng, spot.lat])
+        .addTo(mapRef.current);
+
       markersRef.current.set(spot.id, marker);
     },
     [selectSpot]
