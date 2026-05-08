@@ -45,14 +45,16 @@ export async function updateSession(request: NextRequest) {
 
   // Routes admin
   if (pathname.startsWith("/admin")) {
+    // La page login admin est toujours accessible
+    if (pathname === "/admin/login") return supabaseResponse;
+
     if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = "/auth/login";
-      url.searchParams.set("redirect", pathname);
+      url.pathname = "/admin/login";
       return NextResponse.redirect(url);
     }
 
-    // Vérifier le rôle admin dans Supabase
+    // Vérifier le rôle admin
     const { data: profileRaw } = await supabase
       .from("profiles")
       .select("role")
@@ -63,7 +65,7 @@ export async function updateSession(request: NextRequest) {
 
     if (!profile || profile.role !== "admin") {
       const url = request.nextUrl.clone();
-      url.pathname = "/map";
+      url.pathname = "/admin/login";
       return NextResponse.redirect(url);
     }
   }
