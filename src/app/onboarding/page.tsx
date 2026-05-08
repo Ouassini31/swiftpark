@@ -27,7 +27,7 @@ const SLIDES = [
     ),
     tag: "Tu pars 🚗",
     title: "Partage ta place,\ngagne des coins",
-    sub: "Tu quittes ta place de parking ? Partage l'info en 1 tap et reçois des SwiftCoins dès qu'un conducteur l'achète.",
+    sub: "Tu quittes ta place de parking ? Partage l'info en 1 tap et sois récompensé en SwiftCoins dès qu'un conducteur y accède.",
     bg: "from-amber-50 to-[#f5f5f2]",
   },
   {
@@ -37,8 +37,8 @@ const SLIDES = [
       </div>
     ),
     tag: "Tu cherches 🔍",
-    title: "Achète l'info,\nnavigue direct",
-    sub: "Vois les places disponibles autour de toi. Achète l'info et l'app te guide automatiquement vers la place.",
+    title: "Obtiens l'info,\nnavigue direct",
+    sub: "Vois les places disponibles autour de toi. Accède à l'info et l'app te guide automatiquement vers la place.",
     bg: "from-blue-50 to-[#f5f5f2]",
   },
   {
@@ -49,7 +49,7 @@ const SLIDES = [
     ),
     tag: "SwiftCoins ⚡",
     title: "5 coins offerts\npour démarrer",
-    sub: "Les SwiftCoins sont la monnaie de l'app. Gagne-en en partageant, dépense-les pour trouver une place.",
+    sub: "Les SwiftCoins sont la monnaie de l'app. Sois récompensé en partageant, et utilise-les pour accéder aux infos.",
     bg: "from-yellow-50 to-[#f5f5f2]",
   },
 ];

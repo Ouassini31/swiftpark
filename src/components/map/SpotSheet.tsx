@@ -167,7 +167,7 @@ export default function SpotSheet() {
           </button>
 
           <p className="text-[11px] text-gray-400 text-center mt-3">
-            ℹ️ Tu achètes une information, pas une place de parking
+            ℹ️ Tu accèdes à une information partagée par un conducteur
           </p>
         </div>
       </div>
