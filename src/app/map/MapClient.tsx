@@ -24,13 +24,13 @@ export default function MapClient() {
   const [showSearch, setShowSearch] = useState(false);
   const [showOb, setShowOb]         = useState(false);
 
-  const { selectedSpot, userLat, userLng, setMapCenter, spots } = useMapStore();
+  const { selectedSpot, userLat, userLng, setMapCenter, spots, profile } = useMapStore();
   const { activeSpot, setActiveSpot } = useActiveSpot();
 
   useProfile();
   useGeolocation();
   useRealtimeSpots();
-  usePushNotifications(); // Enregistre SW en arrière-plan
+  usePushNotifications(profile?.id ?? null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("sp_ob")) {
