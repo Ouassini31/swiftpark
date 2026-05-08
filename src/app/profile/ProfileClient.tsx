@@ -228,6 +228,13 @@ export default function ProfileClient({
             bg="bg-yellow-50"
           />
           <QuickLink
+            href="/how-it-works"
+            icon={<span className="text-xl">💡</span>}
+            label="Comment ça marche"
+            sub="Guide & questions fréquentes"
+            bg="bg-blue-50"
+          />
+          <QuickLink
             href="/legal"
             icon={<FileText className="w-5 h-5 text-gray-500" />}
             label="Mentions légales & CGU"
