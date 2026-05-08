@@ -24,14 +24,17 @@ export default function MapHeader({ spotsCount, onLocate, onSearch, onShare }: M
         {/* Ligne 1 : logo + actions */}
         <div className="flex items-center justify-between mb-2.5">
           {/* Logo */}
-          <Link href="/map" className="flex items-center gap-2 bg-white rounded-2xl px-3 py-2 shadow-sm border border-gray-100">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#22956b] to-[#085041] rounded-[10px] flex items-center justify-center">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <Link href="/map" className="flex items-center gap-2.5">
+            <div className="w-11 h-11 bg-gradient-to-br from-[#22956b] to-[#085041] rounded-[14px] flex items-center justify-center shadow-lg shadow-[#22956b]/40">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
               </svg>
             </div>
-            <p className="text-[14px] font-black text-gray-900">SwiftPark</p>
+            <div>
+              <p className="text-[15px] font-black text-gray-900 leading-none">SwiftPark</p>
+              <p className="text-[10px] text-[#22956b] font-semibold mt-0.5">Trouve ta place</p>
+            </div>
           </Link>
 
           {/* Actions droite */}
