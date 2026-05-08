@@ -4,16 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BarChart2, Users, MapPin,
-  ListOrdered, ArrowLeft, Shield,
+  ListOrdered, ArrowLeft, Shield, Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/admin",           icon: LayoutDashboard, label: "Dashboard"   },
-  { href: "/admin/analytics", icon: BarChart2,        label: "Analytics"  },
-  { href: "/admin/users",     icon: Users,            label: "Utilisateurs" },
-  { href: "/admin/spots",     icon: MapPin,           label: "Places"     },
-  { href: "/admin/reservations", icon: ListOrdered,   label: "Réservations" },
+  { href: "/admin",              icon: LayoutDashboard, label: "Dashboard"    },
+  { href: "/admin/analytics",    icon: BarChart2,       label: "Analytics"    },
+  { href: "/admin/users",        icon: Users,           label: "Utilisateurs" },
+  { href: "/admin/spots",        icon: MapPin,          label: "Places"       },
+  { href: "/admin/reservations", icon: ListOrdered,     label: "Réservations" },
+  { href: "/admin/withdrawals",  icon: Banknote,        label: "Retraits"     },
 ];
 
 export default function AdminSidebar({
