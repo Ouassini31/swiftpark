@@ -4,6 +4,7 @@ import { Locate, Search, MapPin, Moon, Sun } from "lucide-react";
 import { useMapStore } from "@/store/useMapStore";
 import Link from "next/link";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 interface MapHeaderProps {
   spotsCount: number;
@@ -51,6 +52,8 @@ export default function MapHeader({ spotsCount, onLocate, onSearch, onShare }: M
                 {profile.coin_balance} SC
               </Link>
             )}
+
+            <NotificationCenter />
 
             <button
               onClick={toggle}

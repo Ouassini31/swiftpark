@@ -62,10 +62,6 @@ export default function MapClient() {
         onShare={() => setShowShare(true)}
       />
 
-      <div className="absolute top-[116px] right-4 z-[810]">
-        <NotificationCenter />
-      </div>
-
       {/* Bannière "Je pars" si place active */}
       {activeSpot && (
         <DepartBanner
