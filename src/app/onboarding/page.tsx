@@ -49,7 +49,7 @@ const SLIDES = [
     ),
     tag: "SwiftCoins ⚡",
     title: "5 coins offerts\npour démarrer",
-    sub: "Les SwiftCoins sont la monnaie de l'app. Sois récompensé en partageant, et utilise-les pour accéder aux infos.",
+    sub: "Les SwiftCoins sont la monnaie de l'app. Sois récompensé en partageant — et dès 20 SC, retire-les en euros directement sur ton compte bancaire. 1 SC = 1€.",
     bg: "from-yellow-50 to-[#f5f5f2]",
   },
 ];

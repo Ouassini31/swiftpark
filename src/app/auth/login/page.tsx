@@ -12,8 +12,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/map";
 
-  const [email, setEmail]       = useState("marie@exemple.fr");
-  const [password, setPassword] = useState("motdepasse");
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading]   = useState(false);
   const [refCode, setRefCode]   = useState("");
 
@@ -51,7 +51,12 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-[var(--t2,#555)] mb-1.5">Mot de passe</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-semibold text-[var(--t2,#555)]">Mot de passe</label>
+            <Link href="/auth/forgot-password" className="text-[10px] text-[#22956b] font-semibold">
+              Mot de passe oublié ?
+            </Link>
+          </div>
           <input
             type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"

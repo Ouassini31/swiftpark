@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
   TrendingUp, TrendingDown, Zap, ArrowLeft,
-  CheckCircle, Loader2, ShoppingCart,
+  CheckCircle, Loader2, ShoppingCart, Banknote,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -134,9 +134,38 @@ export default function WalletClient({
             <p className="text-white font-black text-lg">{profile?.coins_spent ?? 0} SC</p>
           </div>
         </div>
+
+        {/* Bouton retrait */}
+        {balance >= 20 && (
+          <Link
+            href="/withdraw"
+            className="mt-5 w-full py-3 bg-white/20 border border-white/30 rounded-2xl flex items-center justify-center gap-2 text-white font-bold text-sm active:scale-95 transition"
+          >
+            <Banknote className="w-4 h-4" />
+            Retirer mes SC en euros
+          </Link>
+        )}
+        {balance > 0 && balance < 20 && (
+          <p className="mt-4 text-center text-white/50 text-xs">
+            Encore {20 - balance} SC avant de pouvoir retirer
+          </p>
+        )}
       </div>
 
       <div className="px-4 space-y-6 mt-6">
+
+        {/* ── Cashback info ─────────────────────────────────────── */}
+        <div className="bg-gradient-to-r from-[#22956b] to-[#1a7a58] rounded-2xl p-4 flex items-center gap-3.5">
+          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+            <Banknote className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-white font-black text-sm">1 SC = 1€ de cashback</p>
+            <p className="text-white/70 text-xs mt-0.5">
+              Dès 20 SC, retire-les en euros sur ton compte bancaire.
+            </p>
+          </div>
+        </div>
 
         {/* ── Packs d'achat ─────────────────────────────────────── */}
         {displayPacks.length > 0 && (
