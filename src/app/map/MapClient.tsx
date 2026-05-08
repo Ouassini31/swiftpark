@@ -16,6 +16,7 @@ import MapHeader from "@/components/map/MapHeader";
 import Onboarding from "@/components/onboarding/Onboarding";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import DepartBanner from "@/components/parking/DepartBanner";
+import InstallBanner from "@/components/ui/InstallBanner";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), { ssr: false });
 
@@ -74,6 +75,7 @@ export default function MapClient() {
       {showSearch && <SearchSpotSheet onClose={() => setShowSearch(false)} />}
       {showShare  && <ShareSpotModal  onClose={() => setShowShare(false)} />}
 
+      <InstallBanner />
       <BottomNav />
     </div>
   );
