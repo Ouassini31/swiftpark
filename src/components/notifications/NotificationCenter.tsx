@@ -129,7 +129,16 @@ export default function NotificationCenter() {
                 </div>
               ) : (
                 notifications.map((notif) => (
-                  <NotifRow key={notif.id} notif={notif} />
+                  <NotifRow
+                    key={notif.id}
+                    notif={notif}
+                    onDelete={async () => {
+                      const supabase = createClient();
+                      await supabase.from("notifications").delete().eq("id", notif.id);
+                      setNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+                    }}
+                    onClose={() => setOpen(false)}
+                  />
                 ))
               )}
             </div>
@@ -140,14 +149,29 @@ export default function NotificationCenter() {
   );
 }
 
-function NotifRow({ notif }: { notif: Notification }) {
+function NotifRow({ notif, onDelete, onClose }: {
+  notif: Notification;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  const url = (notif as { url?: string }).url;
+
+  function handleClick() {
+    if (url) { onClose(); window.location.href = url; }
+  }
+
   return (
     <div className={`px-4 py-3 border-b border-gray-50 ${!notif.is_read ? "bg-brand-50/50" : ""}`}>
       <div className="flex items-start gap-3">
         <span className="text-xl shrink-0 mt-0.5">
           {NOTIF_ICONS[notif.type] ?? "🔔"}
         </span>
-        <div className="flex-1 min-w-0">
+
+        {/* Contenu cliquable */}
+        <button
+          onClick={handleClick}
+          className={`flex-1 min-w-0 text-left ${url ? "cursor-pointer" : "cursor-default"}`}
+        >
           <p className={`text-sm ${!notif.is_read ? "font-bold text-gray-900" : "font-medium text-gray-700"}`}>
             {notif.title}
           </p>
@@ -155,10 +179,18 @@ function NotifRow({ notif }: { notif: Notification }) {
           <p className="text-[10px] text-gray-400 mt-1">
             {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: fr })}
           </p>
-        </div>
-        {!notif.is_read && (
-          <div className="w-2 h-2 bg-brand-500 rounded-full shrink-0 mt-1.5" />
-        )}
+          {url && (
+            <p className="text-[10px] text-brand-600 font-semibold mt-1">Voir →</p>
+          )}
+        </button>
+
+        {/* Supprimer */}
+        <button
+          onClick={onDelete}
+          className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0 hover:bg-red-100 transition mt-0.5"
+        >
+          <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
+        </button>
       </div>
     </div>
   );
