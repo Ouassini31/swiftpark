@@ -6,5 +6,5 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) redirect("/map");
-  else redirect("/auth/login");
+  else redirect("/onboarding");
 }
