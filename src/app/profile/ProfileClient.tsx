@@ -187,6 +187,30 @@ export default function ProfileClient({
           </div>
         </section>
 
+        {/* ── Code de parrainage ───────────────────────────────── */}
+        {(profile as { referral_code?: string }).referral_code && (
+          <section className="bg-gradient-to-br from-[#22956b] to-[#085041] rounded-2xl p-4 text-white">
+            <p className="text-xs font-semibold text-white/70 mb-1">Ton code de parrainage</p>
+            <div className="flex items-center justify-between">
+              <p className="text-2xl font-black tracking-widest">
+                {(profile as { referral_code?: string }).referral_code}
+              </p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText((profile as { referral_code?: string }).referral_code ?? "");
+                  toast.success("Code copié !");
+                }}
+                className="bg-white/20 px-3 py-1.5 rounded-xl text-xs font-bold"
+              >
+                Copier
+              </button>
+            </div>
+            <p className="text-xs text-white/60 mt-2">
+              Partage ce code — vous gagnez chacun 5 SC 🎁
+            </p>
+          </section>
+        )}
+
         {/* ── Liens rapides ────────────────────────────────────── */}
         <section className="space-y-2">
           <QuickLink

@@ -19,7 +19,7 @@ function GoogleIcon() {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "", username: "", full_name: "" });
+  const [form, setForm] = useState({ email: "", password: "", username: "", full_name: "", referral_code: "" });
   const [loading, setLoading] = useState(false);
 
   async function handleGoogle() {
@@ -54,6 +54,18 @@ export default function RegisterPage() {
       toast.error(error.message);
       setLoading(false);
       return;
+    }
+
+    // Traiter le code de parrainage si fourni
+    if (form.referral_code.trim()) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await fetch("/api/referral", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: user.id, referral_code: form.referral_code.trim() }),
+        });
+      }
     }
 
     toast.success("🎉 Bienvenue ! 5 SwiftCoins offerts");
@@ -116,6 +128,19 @@ export default function RegisterPage() {
               onChange={(e) => update("password", e.target.value)}
               placeholder="Min. 8 caractères"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Code de parrainage <span className="text-gray-400 font-normal">(optionnel)</span>
+            </label>
+            <input
+              type="text"
+              value={form.referral_code}
+              onChange={(e) => update("referral_code", e.target.value.toUpperCase())}
+              placeholder="SWIFT-XXXXXX"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm tracking-widest"
             />
           </div>
 
