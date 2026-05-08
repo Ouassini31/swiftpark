@@ -54,7 +54,7 @@ export default function ProfileClient({
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push("/onboarding");
     router.refresh();
   }
 
