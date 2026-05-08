@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Navigation, Clock, Coins, MapPin } from "lucide-react";
+import { X, Navigation, Clock, MapPin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -39,9 +39,13 @@ export default function SpotSheet() {
     : null;
   const timeAgo = formatDistanceToNow(new Date(selectedSpot.created_at), { addSuffix: true, locale: fr });
 
-  function handleNavigate() {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedSpot!.lat},${selectedSpot!.lng}&travelmode=driving`, "_blank");
-    toast("📍 Navigation ouverte dans Google Maps");
+  function openNavigation(lat: number, lng: number) {
+    // iOS → Plans, Android → Google Maps
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const url = isIOS
+      ? `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`
+      : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    window.open(url, "_blank");
   }
 
   async function handleContrib() {
@@ -77,7 +81,8 @@ export default function SpotSheet() {
       url:            "/reservations",
     });
 
-    toast.success("✓ Info achetée ! Dirige-toi vers la place 📍");
+    toast.success("✓ Info achetée ! Navigation en cours… 📍");
+    openNavigation(selectedSpot!.lat, selectedSpot!.lng);
     selectSpot(null);
     setLoading(false);
   }
@@ -151,23 +156,15 @@ export default function SpotSheet() {
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-2.5">
-            <button
-              onClick={handleNavigate}
-              className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl bg-blue-500 text-white text-xs font-bold flex-1 shadow-lg shadow-blue-500/30 transition active:scale-95"
-            >
-              <Navigation className="w-3.5 h-3.5" />
-              Naviguer
-            </button>
-            <button
-              onClick={handleContrib}
-              disabled={loading || !profile || profile.coin_balance < selectedSpot.coin_price}
-              className="flex-[2] py-3.5 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#22956b]/30 disabled:opacity-40 transition active:scale-[.98]"
-            >
-              {loading ? "…" : `Accéder à l'info · ${selectedSpot.coin_price} SC`}
-            </button>
-          </div>
+          {/* Action unique */}
+          <button
+            onClick={handleContrib}
+            disabled={loading || !profile || profile.coin_balance < selectedSpot.coin_price}
+            className="w-full py-4 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#22956b]/30 disabled:opacity-40 transition active:scale-[.98] flex items-center justify-center gap-2"
+          >
+            <Navigation className="w-4 h-4" />
+            {loading ? "…" : `Payer & Naviguer · ${selectedSpot.coin_price} SC`}
+          </button>
 
           <p className="text-[11px] text-gray-400 text-center mt-3">
             ℹ️ Tu achètes une information, pas une place de parking
