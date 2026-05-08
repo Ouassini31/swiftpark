@@ -40,12 +40,12 @@ export default function SpotSheet() {
   const timeAgo = formatDistanceToNow(new Date(selectedSpot.created_at), { addSuffix: true, locale: fr });
 
   function openNavigation(lat: number, lng: number) {
-    // iOS → Plans, Android → Google Maps
+    // iOS → Plans natif, Android/autre → Google Maps
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const url = isIOS
       ? `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`
       : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-    window.open(url, "_blank");
+    window.location.href = url;
   }
 
   async function handleContrib() {
@@ -163,7 +163,7 @@ export default function SpotSheet() {
             className="w-full py-4 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#22956b]/30 disabled:opacity-40 transition active:scale-[.98] flex items-center justify-center gap-2"
           >
             <Navigation className="w-4 h-4" />
-            {loading ? "…" : `Payer & Naviguer · ${selectedSpot.coin_price} SC`}
+            {loading ? "…" : `Obtenir l'info · ${selectedSpot.coin_price} SC`}
           </button>
 
           <p className="text-[11px] text-gray-400 text-center mt-3">
