@@ -32,7 +32,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 const STYLE_LIGHT  = "mapbox://styles/mapbox/streets-v12";
 const STYLE_DARK   = "mapbox://styles/mapbox/dark-v11";
 
-export default function MapView() {
+export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
   const mapContainer = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef     = useRef<any>(null);
@@ -40,6 +40,9 @@ export default function MapView() {
   const markersRef = useRef<Map<string, any>>(new Map());
 
   const { mapLat, mapLng, mapZoom, userLat, userLng, spots, selectSpot } = useMapStore();
+
+  // Utilise les spots filtrés si fournis, sinon tous les spots
+  const visibleSpots = filteredSpots ?? spots;
 
   // Init Mapbox
   useEffect(() => {
@@ -162,7 +165,7 @@ export default function MapView() {
   );
 
   useEffect(() => {
-    const currentIds = new Set(spots.map((s) => s.id));
+    const currentIds = new Set(visibleSpots.map((s) => s.id));
 
     markersRef.current.forEach((marker, id) => {
       if (!currentIds.has(id)) {
@@ -171,10 +174,10 @@ export default function MapView() {
       }
     });
 
-    spots.forEach((spot) => {
+    visibleSpots.forEach((spot) => {
       if (!markersRef.current.has(spot.id)) createMarker(spot);
     });
-  }, [spots, createMarker]);
+  }, [visibleSpots, createMarker]);
 
   return <div ref={mapContainer} className="absolute inset-0 w-full h-full" />;
 }
