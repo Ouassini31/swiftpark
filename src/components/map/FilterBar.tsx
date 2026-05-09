@@ -1,41 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Clock } from "lucide-react";
 import { useMapStore } from "@/store/useMapStore";
 
 export interface MapFilters {
-  maxPrice: number | null;
-  covered: boolean;
-  handicap: boolean;
+  maxPrice:   number | null;
+  covered:    boolean;
+  handicap:   boolean;
   vehicleType: string | null;
+  arrivalMin: number; // 0 = maintenant
 }
 
-const DEFAULT_FILTERS: MapFilters = {
-  maxPrice: null,
-  covered: false,
-  handicap: false,
+export const DEFAULT_FILTERS: MapFilters = {
+  maxPrice:    null,
+  covered:     false,
+  handicap:    false,
   vehicleType: null,
+  arrivalMin:  0,
 };
 
 interface FilterBarProps {
-  filters: MapFilters;
+  filters:  MapFilters;
   onChange: (f: MapFilters) => void;
 }
 
-const VEHICLE_TYPES = [
-  { value: null,    label: "Tous" },
-  { value: "car",   label: "🚗 Voiture" },
-  { value: "moto",  label: "🏍️ Moto" },
-  { value: "truck", label: "🚚 Utilitaire" },
-];
-
 const PRICES = [
-  { value: null, label: "Prix libre" },
+  { value: null, label: "Tous" },
   { value: 1,    label: "≤ 1 SC" },
   { value: 2,    label: "≤ 2 SC" },
   { value: 5,    label: "≤ 5 SC" },
 ];
+
+function formatArrival(min: number): string {
+  if (min === 0)  return "Maintenant";
+  if (min < 60)  return `Dans ${min} min`;
+  if (min === 60) return "Dans 1h";
+  return `Dans ${Math.floor(min / 60)}h${min % 60 > 0 ? String(min % 60).padStart(2, "0") : ""}`;
+}
 
 export default function FilterBar({ filters, onChange }: FilterBarProps) {
   const [open, setOpen] = useState(false);
@@ -43,14 +45,28 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
 
   const hasActive =
     filters.maxPrice !== null ||
-    filters.covered ||
+    filters.covered  ||
     filters.handicap ||
-    filters.vehicleType !== null;
+    filters.vehicleType !== null ||
+    filters.arrivalMin > 0;
 
   function reset() {
     onChange(DEFAULT_FILTERS);
     setOpen(false);
   }
+
+  // Prévisualisation du nombre de résultats avec tous les filtres actifs
+  const previewCount = spots.filter((s) => {
+    if (filters.maxPrice !== null && s.coin_price > filters.maxPrice) return false;
+    if (filters.covered  && !s.is_covered)  return false;
+    if (filters.handicap && !s.is_handicap) return false;
+    if (filters.vehicleType && s.vehicle_type !== filters.vehicleType) return false;
+    const minsLeft = Math.round((new Date(s.expires_at).getTime() - Date.now()) / 60000);
+    const lo = Math.max(0, filters.arrivalMin - 10);
+    const hi = filters.arrivalMin + 50;
+    if (minsLeft < lo || minsLeft > hi) return false;
+    return true;
+  }).length;
 
   return (
     <div className="relative">
@@ -75,10 +91,9 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
       {/* Panel */}
       {open && (
         <>
-          {/* Overlay */}
           <div className="fixed inset-0 z-[900]" onClick={() => setOpen(false)} />
 
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[1000] p-4 space-y-4">
+          <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[1000] p-4 space-y-4">
             <div className="flex items-center justify-between">
               <p className="font-black text-gray-900 text-sm">Filtres</p>
               {hasActive && (
@@ -88,7 +103,44 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
               )}
             </div>
 
-            {/* Prix max */}
+            {/* ── Arrivée ── */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" /> J&apos;arrive dans…
+                </p>
+                <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
+                  filters.arrivalMin === 0
+                    ? "bg-emerald-100 text-emerald-700"
+                    : filters.arrivalMin <= 20
+                    ? "bg-amber-100 text-amber-700"
+                    : filters.arrivalMin <= 75
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-violet-100 text-violet-700"
+                }`}>
+                  {formatArrival(filters.arrivalMin)}
+                </span>
+              </div>
+
+              {/* Slider */}
+              <input
+                type="range"
+                min={0}
+                max={120}
+                step={5}
+                value={filters.arrivalMin}
+                onChange={(e) => onChange({ ...filters, arrivalMin: Number(e.target.value) })}
+                className="w-full accent-[#22956b] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+                <span>Maintenant</span>
+                <span>30 min</span>
+                <span>1h</span>
+                <span>2h</span>
+              </div>
+            </div>
+
+            {/* ── Prix max ── */}
             <div>
               <p className="text-xs font-bold text-gray-500 mb-2">Prix maximum</p>
               <div className="flex flex-wrap gap-1.5">
@@ -108,27 +160,7 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
               </div>
             </div>
 
-            {/* Type de véhicule */}
-            <div>
-              <p className="text-xs font-bold text-gray-500 mb-2">Véhicule</p>
-              <div className="flex flex-wrap gap-1.5">
-                {VEHICLE_TYPES.map((v) => (
-                  <button
-                    key={String(v.value)}
-                    onClick={() => onChange({ ...filters, vehicleType: v.value })}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
-                      filters.vehicleType === v.value
-                        ? "bg-[#22956b] text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {v.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Toggles */}
+            {/* ── Toggles ── */}
             <div className="space-y-2">
               <Toggle
                 label="🏠 Place couverte"
@@ -144,13 +176,7 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
 
             {/* Résultat */}
             <p className="text-center text-xs text-gray-400">
-              {spots.filter((s) => {
-                if (filters.maxPrice !== null && s.coin_price > filters.maxPrice) return false;
-                if (filters.covered && !s.is_covered) return false;
-                if (filters.handicap && !s.is_handicap) return false;
-                if (filters.vehicleType && s.vehicle_type !== filters.vehicleType) return false;
-                return true;
-              }).length} place(s) correspondante(s)
+              {previewCount} place{previewCount !== 1 ? "s" : ""} correspondante{previewCount !== 1 ? "s" : ""}
             </p>
           </div>
         </>

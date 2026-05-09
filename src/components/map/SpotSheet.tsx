@@ -26,12 +26,14 @@ function getMinutesLeft(expiresAt: string) {
   return Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 60000));
 }
 
-const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
-  citadine: { label: "Citadine",      emoji: "🟢" },
-  compacte: { label: "Compacte",      emoji: "🟡" },
-  berline:  { label: "Berline",       emoji: "🟠" },
-  suv:      { label: "SUV",           emoji: "🔴" },
-  grand:    { label: "Grand gabarit", emoji: "🔴" },
+// Gabarits — taille textuelle (XS→XL) pour ne pas confondre
+// avec le code couleur de l'horizon temporel sur la carte
+const CATEGORY_LABELS: Record<string, { label: string; size: string; bg: string; text: string }> = {
+  citadine: { label: "Citadine",      size: "XS", bg: "bg-slate-100",  text: "text-slate-600"  },
+  compacte: { label: "Compacte",      size: "S",  bg: "bg-sky-100",    text: "text-sky-700"    },
+  berline:  { label: "Berline",       size: "M",  bg: "bg-indigo-100", text: "text-indigo-700" },
+  suv:      { label: "SUV",           size: "L",  bg: "bg-orange-100", text: "text-orange-700" },
+  grand:    { label: "Grand gabarit", size: "XL", bg: "bg-rose-100",   text: "text-rose-700"   },
 };
 
 // Ordre croissant de taille (index = taille)
@@ -213,15 +215,20 @@ export default function SpotSheet() {
                     )}
                   </p>
                 </div>
-                {sharerVehicle.vehicle_category && (
-                  <div className="text-right shrink-0">
-                    <p className="text-base">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.emoji}</p>
-                    <p className="text-[10px] font-bold text-gray-500">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.label}</p>
-                    {sharerVehicle.vehicle_length_cm && (
-                      <p className="text-[10px] text-gray-400">{sharerVehicle.vehicle_length_cm} cm</p>
-                    )}
-                  </div>
-                )}
+                {sharerVehicle.vehicle_category && (() => {
+                  const cat = CATEGORY_LABELS[sharerVehicle.vehicle_category!];
+                  return cat ? (
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className={`text-[11px] font-black px-2 py-0.5 rounded-lg ${cat.bg} ${cat.text}`}>
+                        {cat.size}
+                      </span>
+                      <p className="text-[10px] font-semibold text-gray-400">{cat.label}</p>
+                      {sharerVehicle.vehicle_length_cm && (
+                        <p className="text-[10px] text-gray-400">{sharerVehicle.vehicle_length_cm} cm</p>
+                      )}
+                    </div>
+                  ) : null;
+                })()}
               </div>
 
               {/* Badge compatibilité */}

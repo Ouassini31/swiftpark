@@ -13,7 +13,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import ShareSpotModal from "@/components/parking/ShareSpotModal";
 import SearchSpotSheet from "@/components/map/SearchSpotSheet";
 import MapHeader from "@/components/map/MapHeader";
-import FilterBar, { type MapFilters } from "@/components/map/FilterBar";
+import FilterBar, { type MapFilters, DEFAULT_FILTERS } from "@/components/map/FilterBar";
 import Onboarding from "@/components/onboarding/Onboarding";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import DepartBanner from "@/components/parking/DepartBanner";
@@ -21,12 +21,6 @@ import InstallBanner from "@/components/ui/InstallBanner";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), { ssr: false });
 
-const DEFAULT_FILTERS: MapFilters = {
-  maxPrice: null,
-  covered: false,
-  handicap: false,
-  vehicleType: null,
-};
 
 export default function MapClient() {
   const [showShare, setShowShare]   = useState(false);
@@ -62,9 +56,17 @@ export default function MapClient() {
   // Appliquer les filtres
   const filteredSpots = spots.filter((s) => {
     if (filters.maxPrice !== null && s.coin_price > filters.maxPrice) return false;
-    if (filters.covered && !s.is_covered) return false;
+    if (filters.covered  && !s.is_covered)  return false;
     if (filters.handicap && !s.is_handicap) return false;
     if (filters.vehicleType && s.vehicle_type !== filters.vehicleType) return false;
+
+    // Filtre arrivée : on garde les places dont expires_at est dans la fenêtre
+    // [arrivalMin - 10 min, arrivalMin + 50 min] autour de maintenant
+    const minsLeft = Math.round((new Date(s.expires_at).getTime() - Date.now()) / 60000);
+    const lo = Math.max(0, filters.arrivalMin - 10);
+    const hi = filters.arrivalMin + 50;
+    if (minsLeft < lo || minsLeft > hi) return false;
+
     return true;
   });
 

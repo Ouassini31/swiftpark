@@ -191,13 +191,14 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
     <div className="absolute inset-0 w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
 
-      {/* Légende couleurs */}
+      {/* Légende temporelle */}
       <div className="absolute bottom-28 left-3 z-[700] bg-white/90 backdrop-blur-xl rounded-2xl px-3 py-2.5 shadow-lg border border-white/50 space-y-1.5">
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-1">Libération</p>
         {[
           { color: "#22956b", label: "Maintenant"  },
-          { color: "#f59e0b", label: "Dans 15 min" },
-          { color: "#3b82f6", label: "Dans 1h"     },
-          { color: "#7c3aed", label: "Dans 2h+"    },
+          { color: "#f59e0b", label: "~15 min"     },
+          { color: "#3b82f6", label: "~1h"         },
+          { color: "#7c3aed", label: "2h+"         },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
