@@ -66,7 +66,6 @@ export default function VehicleSelector({ userId, initial }: Props) {
 
   /* Appelé par VehiclePicker quand un modèle est sélectionné */
   function handleModelSelect(newMake: string, newModel: string, localLengthCm?: number) {
-    setMake(newMake);
     setModel(newModel);
     setAutoDetected(false);
 

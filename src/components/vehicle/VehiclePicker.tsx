@@ -53,7 +53,7 @@ export default function VehiclePicker({
     setCustomMakeMode(false);
     setCustomModelMode(false);
     onMakeChange(brand);
-    onModelChange("", undefined); // reset model when brand changes
+    // Le parent reset le modèle dans son callback onMakeChange
   }
 
   function selectModel(name: string, lengthCm: number) {

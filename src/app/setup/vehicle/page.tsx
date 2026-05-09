@@ -70,7 +70,6 @@ export default function SetupVehiclePage() {
     newModel: string,
     localLengthCm?: number,
   ) {
-    setMake(newMake);
     setModel(newModel);
     setAutoDetected(false);
 
