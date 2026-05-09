@@ -1,22 +1,24 @@
 "use client";
 
-import { Locate, Search, MapPin, Moon, Sun } from "lucide-react";
+import { Locate, Search, MapPin, Moon, Sun, Lock } from "lucide-react";
 import { useMapStore } from "@/store/useMapStore";
 import Link from "next/link";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import FilterBar, { type MapFilters } from "@/components/map/FilterBar";
+import { toast } from "sonner";
 
 interface MapHeaderProps {
-  spotsCount: number;
-  onLocate: () => void;
-  onSearch: () => void;
-  onShare: () => void;
-  filters: MapFilters;
-  onFiltersChange: (f: MapFilters) => void;
+  spotsCount:     number;
+  onLocate:       () => void;
+  onSearch:       () => void;
+  onShare:        () => void;
+  filters:        MapFilters;
+  onFiltersChange:(f: MapFilters) => void;
+  hasActiveSpot:  boolean; // bloque "Je me gare" si déjà une place active
 }
 
-export default function MapHeader({ spotsCount, onLocate, onSearch, onShare, filters, onFiltersChange }: MapHeaderProps) {
+export default function MapHeader({ spotsCount, onLocate, onSearch, onShare, filters, onFiltersChange, hasActiveSpot }: MapHeaderProps) {
   const profile = useMapStore((s) => s.profile);
   const { isDark, toggle } = useDarkMode();
 
@@ -74,13 +76,25 @@ export default function MapHeader({ spotsCount, onLocate, onSearch, onShare, fil
             <Search className="w-3.5 h-3.5 text-[#22956b]" />
             Je cherche une place
           </button>
-          <button
-            onClick={onShare}
-            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white rounded-2xl px-4 py-3 text-[13px] font-bold shadow-lg shadow-[#22956b]/30 transition active:scale-95"
-          >
-            <MapPin className="w-3.5 h-3.5" />
-            Je me gare
-          </button>
+          {hasActiveSpot ? (
+            <button
+              onClick={() => toast("Tu as déjà une place active 📍", {
+                description: "Clique sur la bannière pour la gérer ou marquer ton départ.",
+              })}
+              className="flex-1 flex items-center justify-center gap-2 bg-gray-200 text-gray-500 rounded-2xl px-4 py-3 text-[13px] font-bold transition active:scale-95"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              Place active
+            </button>
+          ) : (
+            <button
+              onClick={onShare}
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white rounded-2xl px-4 py-3 text-[13px] font-bold shadow-lg shadow-[#22956b]/30 transition active:scale-95"
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              Je me gare
+            </button>
+          )}
           <FilterBar filters={filters} onChange={onFiltersChange} />
         </div>
       </div>

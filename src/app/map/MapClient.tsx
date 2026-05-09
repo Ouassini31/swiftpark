@@ -83,6 +83,7 @@ export default function MapClient() {
         onShare={() => setShowShare(true)}
         filters={filters}
         onFiltersChange={setFilters}
+        hasActiveSpot={!!activeSpot}
       />
 
       {/* Bannière "Je pars" si place active */}

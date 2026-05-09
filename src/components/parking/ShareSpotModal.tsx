@@ -33,6 +33,22 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
     if (!profile) return;
     setLoading(true);
 
+    // Anti-fraude : vérifier qu'il n'y a pas déjà une place active
+    const supabase = createClient();
+    const { data: existing } = await supabase
+      .from("parking_spots")
+      .select("id")
+      .eq("sharer_id", profile.id)
+      .in("status", ["available", "reserved"])
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      toast.error("Tu as déjà une place active — termine-la avant d'en partager une nouvelle.");
+      setLoading(false);
+      return;
+    }
+
     let address = "";
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&accept-language=fr`);
@@ -40,7 +56,6 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
       address = json.display_name ?? "";
     } catch { /* optionnel */ }
 
-    const supabase = createClient();
     const { error } = await supabase.from("parking_spots").insert({
       sharer_id: profile.id, lat: userLat, lng: userLng,
       location: `POINT(${userLng} ${userLat})` as unknown as never,

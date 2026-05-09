@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCategory, CATEGORY_LABELS } from "@/lib/vehicle";
+import { VEHICLE_BRANDS } from "@/lib/vehicleBrands";
 
 const BASE = "https://www.carqueryapi.com/api/0.3/";
 
-// GET /api/vehicles?cmd=makes
+// GET /api/vehicles?cmd=makes   → liste locale worldwide
 // GET /api/vehicles?cmd=models&make=volkswagen
 // GET /api/vehicles?cmd=trims&make=volkswagen&model=golf&year=2020
 export async function GET(req: NextRequest) {
@@ -13,12 +14,17 @@ export async function GET(req: NextRequest) {
   const model = searchParams.get("model") ?? "";
   const year  = searchParams.get("year") ?? "";
 
+  // Marques : liste locale — aucune dépendance externe, couvre toutes les régions
+  if (cmd === "makes") {
+    return NextResponse.json({
+      Makes: VEHICLE_BRANDS.map((b) => ({ make_id: b, make_display: b })),
+    });
+  }
+
   try {
     let url = "";
 
-    if (cmd === "makes") {
-      url = `${BASE}?cmd=getMakes&full_results=1`;
-    } else if (cmd === "models" && make) {
+    if (cmd === "models" && make) {
       url = `${BASE}?cmd=getModels&make=${encodeURIComponent(make)}&full_results=1`;
     } else if (cmd === "trims" && make && model) {
       url = `${BASE}?cmd=getTrims&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}${year ? `&year=${year}` : ""}&full_results=1`;
