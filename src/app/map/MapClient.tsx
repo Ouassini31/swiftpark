@@ -99,6 +99,24 @@ export default function MapClient() {
         />
       )}
 
+      {/* Légende temporelle — remonte si le bandeau DepartBanner est actif */}
+      <div className={`absolute left-3 z-[700] bg-white/90 backdrop-blur-xl rounded-2xl px-3 py-2.5 shadow-lg border border-white/50 space-y-1.5 transition-all duration-300 ${
+        activeSpot ? "bottom-52" : "bottom-24"
+      }`}>
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-1">Libération</p>
+        {[
+          { color: "#22956b", label: "Maintenant" },
+          { color: "#f59e0b", label: "~15 min"    },
+          { color: "#3b82f6", label: "~1h"        },
+          { color: "#7c3aed", label: "2h+"        },
+        ].map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+            <span className="text-[11px] font-semibold text-gray-700">{label}</span>
+          </div>
+        ))}
+      </div>
+
       {selectedSpot && <SpotSheet />}
       {showSearch && <SearchSpotSheet onClose={() => setShowSearch(false)} />}
       {showShare  && <ShareSpotModal  onClose={() => setShowShare(false)} />}
