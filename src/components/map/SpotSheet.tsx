@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Navigation, Clock, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Navigation, Clock, MapPin, Car } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -26,9 +26,44 @@ function getMinutesLeft(expiresAt: string) {
   return Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 60000));
 }
 
+const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
+  citadine: { label: "Citadine",      emoji: "🟢" },
+  compacte: { label: "Compacte",      emoji: "🟡" },
+  berline:  { label: "Berline",       emoji: "🟠" },
+  suv:      { label: "SUV",           emoji: "🔴" },
+  grand:    { label: "Grand gabarit", emoji: "🔴" },
+};
+
+const COLORS_FR: Record<string, string> = {
+  blanc: "blanche", noir: "noire", gris: "grise", argent: "argentée",
+  rouge: "rouge", bleu: "bleue", vert: "verte", jaune: "jaune",
+  orange: "orange", marron: "marron", beige: "beige", violet: "violette",
+};
+
+interface SharerVehicle {
+  vehicle_make: string | null;
+  vehicle_model: string | null;
+  vehicle_color: string | null;
+  vehicle_length_cm: number | null;
+  vehicle_category: string | null;
+}
+
 export default function SpotSheet() {
   const { selectedSpot, selectSpot, profile, userLat, userLng } = useMapStore();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]           = useState(false);
+  const [sharerVehicle, setSharerVehicle] = useState<SharerVehicle | null>(null);
+
+  // Charger le véhicule du sharer
+  useEffect(() => {
+    if (!selectedSpot) return;
+    const supabase = createClient();
+    supabase
+      .from("profiles" as never)
+      .select("vehicle_make, vehicle_model, vehicle_color, vehicle_length_cm, vehicle_category")
+      .eq("id", selectedSpot.sharer_id)
+      .single()
+      .then(({ data }: { data: unknown }) => setSharerVehicle((data as SharerVehicle) ?? null));
+  }, [selectedSpot?.id]);
 
   if (!selectedSpot) return null;
 
@@ -147,6 +182,33 @@ export default function SpotSheet() {
               small
             />
           </div>
+
+          {/* Véhicule du sharer */}
+          {sharerVehicle?.vehicle_make && (
+            <div className="bg-gray-50 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
+              <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                <Car className="w-4 h-4 text-[#22956b]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-400 font-semibold">Voiture qui part</p>
+                <p className="text-sm font-black text-gray-900 truncate">
+                  {sharerVehicle.vehicle_make} {sharerVehicle.vehicle_model}
+                  {sharerVehicle.vehicle_color && (
+                    <span className="font-semibold text-gray-500"> · {COLORS_FR[sharerVehicle.vehicle_color] ?? sharerVehicle.vehicle_color}</span>
+                  )}
+                </p>
+              </div>
+              {sharerVehicle.vehicle_category && (
+                <div className="text-right shrink-0">
+                  <p className="text-base">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.emoji}</p>
+                  <p className="text-[10px] font-bold text-gray-500">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.label}</p>
+                  {sharerVehicle.vehicle_length_cm && (
+                    <p className="text-[10px] text-gray-400">{sharerVehicle.vehicle_length_cm} cm</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Solde */}
           {profile && (

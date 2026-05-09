@@ -10,6 +10,7 @@ import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
+import VehicleSelector from "@/components/profile/VehicleSelector";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -27,10 +28,11 @@ function getBadges(profile: Profile): Badge[] {
 }
 
 export default function ProfileClient({
-  profile, email,
+  profile, email, userId,
 }: {
   profile: Profile | null;
   email: string;
+  userId: string;
 }) {
   const router = useRouter();
   const [editing, setEditing]   = useState(false);
@@ -210,6 +212,19 @@ export default function ProfileClient({
             </p>
           </section>
         )}
+
+        {/* ── Véhicule ─────────────────────────────────────────── */}
+        <VehicleSelector
+          userId={userId}
+          initial={{
+            make:      (profile as Record<string, unknown>).vehicle_make as string ?? "",
+            model:     (profile as Record<string, unknown>).vehicle_model as string ?? "",
+            year:      (profile as Record<string, unknown>).vehicle_year as number | null ?? null,
+            color:     (profile as Record<string, unknown>).vehicle_color as string ?? "",
+            length_cm: (profile as Record<string, unknown>).vehicle_length_cm as number | null ?? null,
+            category:  (profile as Record<string, unknown>).vehicle_category as string | null ?? null,
+          }}
+        />
 
         {/* ── Liens rapides ────────────────────────────────────── */}
         <section className="space-y-2">
