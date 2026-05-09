@@ -165,7 +165,7 @@ export default function ReservationsClient({
       {ratingTarget && (
         <RatingModal
           reservationId={ratingTarget.id}
-          spotAddress={ratingTarget.parking_spot?.address ?? ratingTarget.spot?.address ?? null}
+          spotAddress={ratingTarget.parking_spots?.address ?? null}
           sharerId={ratingTarget.sharer_id}
           onClose={() => setRatingTarget(null)}
         />
