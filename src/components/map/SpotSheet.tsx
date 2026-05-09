@@ -34,6 +34,20 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
   grand:    { label: "Grand gabarit", emoji: "🔴" },
 };
 
+// Ordre croissant de taille (index = taille)
+const CATEGORY_ORDER = ["citadine", "compacte", "berline", "suv", "grand"];
+
+function getCompatibility(finderCat: string | null, sharerCat: string | null): {
+  ok: boolean; warning: boolean; message: string;
+} {
+  if (!finderCat || !sharerCat) return { ok: true, warning: false, message: "" };
+  const fi = CATEGORY_ORDER.indexOf(finderCat);
+  const si = CATEGORY_ORDER.indexOf(sharerCat);
+  if (si >= fi) return { ok: true, warning: false, message: "✅ Compatible avec ton véhicule" };
+  if (si === fi - 1) return { ok: true, warning: true,  message: "⚠️ Place peut-être juste — vérifie bien" };
+  return { ok: false, warning: true, message: "❌ Place probablement trop petite pour ton véhicule" };
+}
+
 const COLORS_FR: Record<string, string> = {
   blanc: "blanche", noir: "noire", gris: "grise", argent: "argentée",
   rouge: "rouge", bleu: "bleue", vert: "verte", jaune: "jaune",
@@ -183,30 +197,48 @@ export default function SpotSheet() {
             />
           </div>
 
-          {/* Véhicule du sharer */}
+          {/* Véhicule du sharer + compatibilité */}
           {sharerVehicle?.vehicle_make && (
-            <div className="bg-gray-50 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
-              <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
-                <Car className="w-4 h-4 text-[#22956b]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-400 font-semibold">Voiture qui part</p>
-                <p className="text-sm font-black text-gray-900 truncate">
-                  {sharerVehicle.vehicle_make} {sharerVehicle.vehicle_model}
-                  {sharerVehicle.vehicle_color && (
-                    <span className="font-semibold text-gray-500"> · {COLORS_FR[sharerVehicle.vehicle_color] ?? sharerVehicle.vehicle_color}</span>
-                  )}
-                </p>
-              </div>
-              {sharerVehicle.vehicle_category && (
-                <div className="text-right shrink-0">
-                  <p className="text-base">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.emoji}</p>
-                  <p className="text-[10px] font-bold text-gray-500">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.label}</p>
-                  {sharerVehicle.vehicle_length_cm && (
-                    <p className="text-[10px] text-gray-400">{sharerVehicle.vehicle_length_cm} cm</p>
-                  )}
+            <div className="mb-4 space-y-2">
+              <div className="bg-gray-50 rounded-2xl px-4 py-3 flex items-center gap-3">
+                <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                  <Car className="w-4 h-4 text-[#22956b]" />
                 </div>
-              )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-400 font-semibold">Voiture qui part</p>
+                  <p className="text-sm font-black text-gray-900 truncate">
+                    {sharerVehicle.vehicle_make} {sharerVehicle.vehicle_model}
+                    {sharerVehicle.vehicle_color && (
+                      <span className="font-semibold text-gray-500"> · {COLORS_FR[sharerVehicle.vehicle_color] ?? sharerVehicle.vehicle_color}</span>
+                    )}
+                  </p>
+                </div>
+                {sharerVehicle.vehicle_category && (
+                  <div className="text-right shrink-0">
+                    <p className="text-base">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.emoji}</p>
+                    <p className="text-[10px] font-bold text-gray-500">{CATEGORY_LABELS[sharerVehicle.vehicle_category]?.label}</p>
+                    {sharerVehicle.vehicle_length_cm && (
+                      <p className="text-[10px] text-gray-400">{sharerVehicle.vehicle_length_cm} cm</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Badge compatibilité */}
+              {(() => {
+                const finderCat = (profile as Record<string, unknown>)?.vehicle_category as string | null;
+                if (!finderCat) return null;
+                const compat = getCompatibility(finderCat, sharerVehicle.vehicle_category);
+                return (
+                  <div className={`px-3 py-2 rounded-xl text-xs font-bold ${
+                    !compat.warning ? "bg-green-50 text-green-700" :
+                    compat.ok      ? "bg-amber-50 text-amber-700" :
+                                     "bg-red-50 text-red-600"
+                  }`}>
+                    {compat.message}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

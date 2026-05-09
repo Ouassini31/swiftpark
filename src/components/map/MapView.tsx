@@ -179,5 +179,24 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
     });
   }, [visibleSpots, createMarker]);
 
-  return <div ref={mapContainer} className="absolute inset-0 w-full h-full" />;
+  return (
+    <div className="absolute inset-0 w-full h-full">
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+
+      {/* Légende couleurs */}
+      <div className="absolute bottom-28 left-3 z-[700] bg-white/90 backdrop-blur-xl rounded-2xl px-3 py-2.5 shadow-lg border border-white/50 space-y-1.5">
+        {[
+          { color: "#22956b", label: "Maintenant"  },
+          { color: "#f59e0b", label: "Dans 15 min" },
+          { color: "#3b82f6", label: "Dans 1h"     },
+          { color: "#7c3aed", label: "Dans 2h+"    },
+        ].map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+            <span className="text-[11px] font-semibold text-gray-700">{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
