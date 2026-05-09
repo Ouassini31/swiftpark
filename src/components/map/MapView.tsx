@@ -136,8 +136,13 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
       const color   = HORIZON_COLOR[horizon];
       const eta     = getEta(spot.expires_at);
 
+      // Wrapper vide — Mapbox l'utilise pour positionner (ne pas toucher à son transform)
       const el = document.createElement("div");
-      el.style.cssText = [
+      el.style.cssText = "cursor:pointer;";
+
+      // Enfant visuel — on applique le scale ici uniquement
+      const pill = document.createElement("div");
+      pill.style.cssText = [
         `background:${color}`,
         "color:#fff",
         "border-radius:20px",
@@ -146,13 +151,15 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
         "font-weight:800",
         "white-space:nowrap",
         "box-shadow:0 4px 12px rgba(0,0,0,.25)",
-        "cursor:pointer",
         "border:2px solid rgba(255,255,255,.3)",
         "transition:transform .15s",
+        "transform-origin:center bottom",
       ].join(";");
-      el.textContent = `${spot.coin_price} SC · ${eta}`;
-      el.addEventListener("mouseenter", () => { el.style.transform = "scale(1.08)"; });
-      el.addEventListener("mouseleave", () => { el.style.transform = "scale(1)"; });
+      pill.textContent = `${spot.coin_price} SC · ${eta}`;
+      el.appendChild(pill);
+
+      el.addEventListener("mouseenter", () => { pill.style.transform = "scale(1.08)"; });
+      el.addEventListener("mouseleave", () => { pill.style.transform = "scale(1)"; });
       el.addEventListener("click", () => selectSpot(spot));
 
       const marker = new mapboxgl.Marker({ element: el, anchor: "bottom" })
