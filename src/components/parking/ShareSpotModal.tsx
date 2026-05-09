@@ -62,6 +62,7 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
       address, coin_price: price, vehicle_type: "car", status: "available",
       available_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + duration * 60 * 1000).toISOString(),
+      sharer_vehicle_category: (profile as Record<string, unknown>).vehicle_category as string ?? null,
     });
 
     if (error) { toast.error("Impossible de partager"); setLoading(false); return; }

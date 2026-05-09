@@ -6,6 +6,7 @@ import type { Database } from "@/types/database";
 
 type Spot = Database["public"]["Tables"]["parking_spots"]["Row"];
 
+/* ── Horizon temporel (couleur du marqueur) ── */
 const HORIZON_COLOR: Record<string, string> = {
   now: "#22956b",
   "15": "#f59e0b",
@@ -28,6 +29,35 @@ function getEta(expiresAt: string): string {
   return `${Math.round(mins / 60)}h`;
 }
 
+/* ── Gabarit du véhicule ── */
+const CATEGORY_ORDER = ["citadine", "compacte", "berline", "suv", "grand"];
+
+const CATEGORY_SIZE: Record<string, string> = {
+  citadine: "XS",
+  compacte: "S",
+  berline:  "M",
+  suv:      "L",
+  grand:    "XL",
+};
+
+/**
+ * Calcule l'opacité du marqueur selon la compatibilité de gabarit.
+ * - Compatible (place assez grande)  → 1.0  (pleine visibilité)
+ * - Place légèrement juste           → 0.55 (atténué)
+ * - Place trop petite                → 0.22 (quasi invisible)
+ */
+function getCompatibilityOpacity(
+  sharerCat: string | null,
+  userCat:   string | null,
+): number {
+  if (!sharerCat || !userCat) return 1;
+  const si = CATEGORY_ORDER.indexOf(sharerCat);
+  const ui = CATEGORY_ORDER.indexOf(userCat);
+  if (si >= ui)       return 1;
+  if (si === ui - 1)  return 0.55;
+  return 0.22;
+}
+
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 const STYLE_LIGHT  = "mapbox://styles/mapbox/streets-v12";
 const STYLE_DARK   = "mapbox://styles/mapbox/dark-v11";
@@ -39,15 +69,16 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markersRef = useRef<Map<string, any>>(new Map());
 
-  const { mapLat, mapLng, mapZoom, userLat, userLng, spots, selectSpot } = useMapStore();
+  const { mapLat, mapLng, mapZoom, userLat, userLng, spots, selectSpot, profile } = useMapStore();
 
-  // Utilise les spots filtrés si fournis, sinon tous les spots
   const visibleSpots = filteredSpots ?? spots;
 
-  // Init Mapbox
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userVehicleCategory = (profile as any)?.vehicle_category as string | null ?? null;
+
+  /* ── Init Mapbox ── */
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
-
     let cancelled = false;
 
     async function init() {
@@ -55,7 +86,6 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
       if (cancelled || !mapContainer.current) return;
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
-
       const isDark = document.documentElement.dataset.theme === "dark";
 
       const map = new mapboxgl.Map({
@@ -68,14 +98,12 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
 
       mapRef.current = map;
 
-      // Changer style au changement de thème
       const obs = new MutationObserver(() => {
         if (!mapRef.current) return;
         const dark = document.documentElement.dataset.theme === "dark";
         mapRef.current.setStyle(dark ? STYLE_DARK : STYLE_LIGHT);
       });
       obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-
       map.on("remove", () => obs.disconnect());
     }
 
@@ -91,7 +119,7 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Marqueur utilisateur (point bleu pulsé)
+  /* ── Marqueur utilisateur (point bleu pulsé) ── */
   useEffect(() => {
     if (!mapRef.current || !userLat || !userLng) return;
 
@@ -120,15 +148,15 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
     })();
   }, [userLat, userLng]);
 
-  // Centrer la carte
+  /* ── Centrer la carte ── */
   useEffect(() => {
     if (!mapRef.current) return;
     mapRef.current.easeTo({ center: [mapLng, mapLat], zoom: mapZoom, duration: 600 });
   }, [mapLat, mapLng, mapZoom]);
 
-  // Marqueurs des places
+  /* ── Marqueurs des places ── */
   const createMarker = useCallback(
-    async (spot: Spot) => {
+    async (spot: Spot, userCat: string | null) => {
       if (!mapRef.current) return;
       const mapboxgl = (await import("mapbox-gl")).default;
 
@@ -136,30 +164,73 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
       const color   = HORIZON_COLOR[horizon];
       const eta     = getEta(spot.expires_at);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sharerCat = (spot as any).sharer_vehicle_category as string | null ?? null;
+      const sizeLabel = sharerCat ? CATEGORY_SIZE[sharerCat] : null;
+      const opacity   = getCompatibilityOpacity(sharerCat, userCat);
+
+      /* ── Conteneur principal ── */
       const el = document.createElement("div");
       el.style.cssText = [
+        "display:flex",
+        "align-items:center",
+        "gap:6px",
+        `opacity:${opacity}`,
+        "cursor:pointer",
+        "transition:opacity .15s",
+      ].join(";");
+
+      /* ── Pill (prix · temps) ── */
+      const pill = document.createElement("div");
+      pill.style.cssText = [
         `background:${color}`,
         "color:#fff",
         "border-radius:20px",
-        "padding:6px 12px",
+        "padding:6px 11px",
         "font-size:12px",
         "font-weight:800",
         "white-space:nowrap",
-        "cursor:pointer",
         "box-shadow:0 4px 12px rgba(0,0,0,.25)",
         "border:2px solid rgba(255,255,255,.3)",
-        "transition:box-shadow .15s, opacity .15s",
+        "transition:box-shadow .15s",
       ].join(";");
-      el.textContent = `${spot.coin_price} SC · ${eta}`;
+      pill.textContent = `${spot.coin_price} SC · ${eta}`;
+      el.appendChild(pill);
 
-      // Hover : on change uniquement box-shadow et opacity, jamais transform
+      /* ── Badge gabarit (XS/S/M/L/XL) ── */
+      if (sizeLabel) {
+        const badge = document.createElement("div");
+
+        // Couleur du badge selon compatibilité
+        let badgeBg = "#fff";
+        let badgeColor = "#111";
+        if (opacity === 1)    { badgeBg = "#fff";       badgeColor = "#111"; }
+        if (opacity === 0.55) { badgeBg = "#fff3cd";    badgeColor = "#92400e"; }
+        if (opacity === 0.22) { badgeBg = "#fee2e2";    badgeColor = "#991b1b"; }
+
+        badge.style.cssText = [
+          `background:${badgeBg}`,
+          `color:${badgeColor}`,
+          "border-radius:10px",
+          "padding:3px 7px",
+          "font-size:10px",
+          "font-weight:900",
+          "white-space:nowrap",
+          "box-shadow:0 2px 6px rgba(0,0,0,.18)",
+          "letter-spacing:0.03em",
+        ].join(";");
+        badge.textContent = sizeLabel;
+        el.appendChild(badge);
+      }
+
+      /* ── Hover ── */
       el.addEventListener("mouseenter", () => {
-        el.style.boxShadow = "0 6px 20px rgba(0,0,0,.4)";
-        el.style.opacity = "0.9";
+        pill.style.boxShadow = "0 6px 20px rgba(0,0,0,.4)";
+        el.style.opacity = String(Math.min(1, opacity + 0.1));
       });
       el.addEventListener("mouseleave", () => {
-        el.style.boxShadow = "0 4px 12px rgba(0,0,0,.25)";
-        el.style.opacity = "1";
+        pill.style.boxShadow = "0 4px 12px rgba(0,0,0,.25)";
+        el.style.opacity = String(opacity);
       });
       el.addEventListener("click", () => selectSpot(spot));
 
@@ -172,6 +243,7 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
     [selectSpot]
   );
 
+  /* ── Sync marqueurs ↔ spots visibles ── */
   useEffect(() => {
     const currentIds = new Set(visibleSpots.map((s) => s.id));
 
@@ -183,14 +255,13 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
     });
 
     visibleSpots.forEach((spot) => {
-      if (!markersRef.current.has(spot.id)) createMarker(spot);
+      if (!markersRef.current.has(spot.id)) createMarker(spot, userVehicleCategory);
     });
-  }, [visibleSpots, createMarker]);
+  }, [visibleSpots, createMarker, userVehicleCategory]);
 
   return (
     <div className="absolute inset-0 w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
-
     </div>
   );
 }
