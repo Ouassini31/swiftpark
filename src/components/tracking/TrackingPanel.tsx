@@ -1,9 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useRealtimeTracking } from "@/hooks/useRealtimeTracking";
 import { haversineDistance } from "@/lib/utils";
+import { createClientAny as createClient } from "@/lib/supabase/client";
+import { notifyUser } from "@/lib/notify";
+import { useMapStore } from "@/store/useMapStore";
+import { toast } from "sonner";
 
 // Load Leaflet map only on client to avoid SSR issues
 const LiveTrackingMap = dynamic(() => import("./LiveTrackingMap"), { ssr: false });
@@ -29,6 +34,8 @@ export default function TrackingPanel({
 }: TrackingPanelProps) {
   const { finderLat, finderLng, finderAccuracy, isFinderOnline, sendPosition } =
     useRealtimeTracking(reservationId);
+  const { profile } = useMapStore();
+  const [departing, setDeparting] = useState(false);
 
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -111,6 +118,82 @@ export default function TrackingPanel({
     isFinderOnline &&
     distance != null &&
     distance <= DEPART_THRESHOLD_M;
+
+  /* ── Départ réel depuis le tracking ── */
+  async function handleDepart() {
+    if (!profile) return;
+    setDeparting(true);
+    stopWatching();
+
+    const pos = await new Promise<GeolocationPosition | null>((resolve) =>
+      navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
+        enableHighAccuracy: true, timeout: 10000,
+      })
+    );
+
+    const lat = pos?.coords.latitude  ?? spotLat;
+    const lng = pos?.coords.longitude ?? spotLng;
+    const supabase = createClient();
+
+    // Chercher la réservation active
+    const { data: reservation } = await supabase
+      .from("reservations")
+      .select("*")
+      .eq("id", reservationId)
+      .eq("status", "reserved")
+      .maybeSingle();
+
+    if (reservation) {
+      await supabase
+        .from("reservations")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
+        .eq("id", reservation.id);
+
+      await supabase.rpc("process_coin_transaction", {
+        p_user_id:        profile.id,
+        p_amount:         reservation.sharer_receive,
+        p_type:           "earn",
+        p_description:    `Gain place partagée · ${reservation.sharer_receive} SC`,
+        p_reservation_id: reservation.id,
+      });
+
+      notifyUser({
+        user_id:        reservation.finder_id,
+        type:           "spot_validated",
+        title:          "🏃 Le partageur part maintenant !",
+        message:        "La place se libère ! Dépêche-toi d'arriver.",
+        reservation_id: reservation.id,
+        url:            "/map",
+      });
+
+      notifyUser({
+        user_id:        profile.id,
+        type:           "payment_received",
+        title:          `✅ +${reservation.sharer_receive} SC reçus !`,
+        message:        "Tes SwiftCoins sont crédités.",
+        reservation_id: reservation.id,
+        url:            "/wallet",
+      });
+
+      toast.success(`✅ +${reservation.sharer_receive} SC crédités !`);
+    }
+
+    // Marquer la place comme complétée
+    await supabase
+      .from("parking_spots")
+      .update({
+        status:           "completed",
+        sharer_validated: true,
+        sharer_gps_lat:   lat,
+        sharer_gps_lng:   lng,
+        validated_at:     new Date().toISOString(),
+      })
+      .eq("sharer_id", profile.id)
+      .in("status", ["available", "reserved"]);
+
+    setDeparting(false);
+    onClose?.();
+  }
 
   return (
     <div className="flex flex-col h-full bg-[#f5f5f2]">
@@ -204,10 +287,14 @@ export default function TrackingPanel({
         {/* Depart button — only for sharer when finder is close */}
         {canDepart && (
           <button
-            onClick={onClose}
-            className="w-full py-4 bg-[#22956b] text-white text-base font-black rounded-2xl shadow-lg active:scale-95 transition-transform"
+            onClick={handleDepart}
+            disabled={departing}
+            className="w-full py-4 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white text-base font-black rounded-2xl shadow-lg shadow-[#22956b]/30 active:scale-95 transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            🚗 Je pars — la place est libre !
+            {departing
+              ? <><Loader2 className="w-5 h-5 animate-spin" /> Finalisation…</>
+              : "🚗 Je pars — la place est libre !"
+            }
           </button>
         )}
       </div>

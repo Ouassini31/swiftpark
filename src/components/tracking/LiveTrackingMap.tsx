@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import "leaflet/dist/leaflet.css";
+import { useEffect, useRef, useState } from "react";
 import { haversineDistance } from "@/lib/utils";
 
 interface LiveTrackingMapProps {
@@ -51,6 +52,8 @@ export default function LiveTrackingMap({
         ? `~${etaMinutes} min à pied`
         : `~${Math.round(etaMinutes / 60)}h à pied`
       : null;
+
+  const [mapReady, setMapReady] = useState(false);
 
   // Init map (client-only)
   useEffect(() => {
@@ -104,6 +107,7 @@ export default function LiveTrackingMap({
 
       // Set initial view
       map.setView([spotLat, spotLng], 15);
+      if (!cancelled) setMapReady(true);
     }
 
     initMap();
@@ -201,12 +205,21 @@ export default function LiveTrackingMap({
 
   return (
     <div className="relative w-full h-full">
-      {/* Badges */}
+
+      {/* Skeleton pendant le chargement de Leaflet */}
+      {!mapReady && (
+        <div className="absolute inset-0 z-[500] bg-gray-100 flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full border-4 border-[#22956b] border-t-transparent animate-spin" />
+          <p className="text-xs text-gray-400 font-semibold">Chargement de la carte…</p>
+        </div>
+      )}
+
+      {/* Badges distance / ETA */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-1.5 pointer-events-none">
         {!isFinderOnline ? (
           <div className="bg-white/90 backdrop-blur-sm text-gray-500 text-xs font-semibold px-4 py-2 rounded-full shadow-md flex items-center gap-2">
-            <span className="w-2 h-2 bg-gray-400 rounded-full inline-block" />
-            En attente du conducteur...
+            <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse inline-block" />
+            En attente du conducteur…
           </div>
         ) : (
           <>
@@ -225,7 +238,7 @@ export default function LiveTrackingMap({
       </div>
 
       {/* Map container */}
-      <div ref={mapContainerRef} className="w-full h-full rounded-none" />
+      <div ref={mapContainerRef} className="w-full h-full" />
     </div>
   );
 }
