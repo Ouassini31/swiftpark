@@ -33,7 +33,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Routes protégées utilisateur
-  const protectedPaths = ["/map", "/profile", "/wallet", "/reservations", "/leaderboard", "/search"];
+  const protectedPaths = ["/map", "/profile", "/wallet", "/reservations", "/leaderboard", "/search", "/withdraw"];
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (!user && isProtected) {
@@ -41,6 +41,23 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/auth/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Véhicule obligatoire — bloque l'accès à la carte si pas renseigné
+  if (user && isProtected && pathname !== "/setup/vehicle") {
+    const { data: profileRaw } = await supabase
+      .from("profiles")
+      .select("vehicle_make")
+      .eq("id", user.id)
+      .single();
+
+    const profile = profileRaw as { vehicle_make: string | null } | null;
+
+    if (!profile?.vehicle_make) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/setup/vehicle";
+      return NextResponse.redirect(url);
+    }
   }
 
   // Routes admin
