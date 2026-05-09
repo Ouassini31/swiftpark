@@ -102,7 +102,7 @@ export default function MapClient() {
       {/* Légende temporelle — remonte si le bandeau DepartBanner est actif */}
       <div
         className="absolute left-3 z-[700] bg-white/90 backdrop-blur-xl rounded-2xl px-3 py-2.5 shadow-lg border border-white/50 space-y-1.5 transition-all duration-300"
-        style={{ bottom: activeSpot ? "220px" : "96px" }}
+        style={{ bottom: activeSpot ? "260px" : "96px" }}
       >
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-1">Libération</p>
         {[
