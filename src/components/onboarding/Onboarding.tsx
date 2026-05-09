@@ -91,7 +91,7 @@ export default function Onboarding({ onDone }: OnboardingProps) {
       {/* Slides */}
       <div className="flex-1 overflow-hidden relative">
         <div
-          className="flex h-full transition-transform duration-400 ease-[cubic-bezier(.4,0,.2,1)]"
+          className="flex h-full transition-transform duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
           style={{ transform: `translateX(-${current * 100}%)`, width: `${SLIDES.length * 100}%` }}
         >
           {SLIDES.map((s, i) => (

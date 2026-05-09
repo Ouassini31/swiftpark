@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
   TrendingUp, TrendingDown, Zap, ArrowLeft,
-  CheckCircle, Loader2, ShoppingCart, Banknote,
+  CheckCircle, Loader2, ShoppingCart, Banknote, RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -42,11 +42,24 @@ export default function WalletClient({
   transactions: Transaction[];
   packs: CoinPack[];
 }) {
-  const params  = useSearchParams();
-  const success = params.get("success") === "1";
+  const params   = useSearchParams();
+  const router   = useRouter();
+  const success  = params.get("success") === "1";
   const canceled = params.get("canceled") === "1";
 
-  const [buying, setBuying] = useState<string | null>(null);
+  const [buying, setBuying]         = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  /* Après un paiement Stripe, le webhook crédite les coins en asynchrone.
+     On attend 4 s puis on recharge la page pour avoir le bon solde. */
+  useEffect(() => {
+    if (!success) return;
+    const t = setTimeout(() => {
+      setRefreshing(true);
+      router.refresh();
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [success, router]);
 
   async function handleBuy(pack: CoinPack) {
     setBuying(pack.id);
@@ -91,11 +104,22 @@ export default function WalletClient({
 
         {/* Bannière succès / annulation */}
         {success && (
-          <div className="mb-6 bg-white/20 rounded-2xl px-4 py-3 flex items-center gap-2.5">
-            <CheckCircle className="w-5 h-5 text-white shrink-0" />
-            <p className="text-white text-sm font-semibold">
-              Paiement réussi ! Tes SwiftCoins ont été crédités ✨
-            </p>
+          <div className="mb-6 bg-white/20 rounded-2xl px-4 py-3 space-y-1">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle className="w-5 h-5 text-white shrink-0" />
+              <p className="text-white text-sm font-semibold">
+                Paiement réussi ! Tes SwiftCoins arrivent ✨
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pl-7">
+              {refreshing
+                ? <Loader2 className="w-3.5 h-3.5 text-white/70 animate-spin" />
+                : <RefreshCw className="w-3.5 h-3.5 text-white/70 animate-spin" />
+              }
+              <p className="text-white/60 text-xs">
+                {refreshing ? "Mise à jour du solde…" : "Crédit en cours (quelques secondes)…"}
+              </p>
+            </div>
           </div>
         )}
         {canceled && (

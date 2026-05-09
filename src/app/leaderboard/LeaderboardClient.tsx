@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Star, Trophy, Medal } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowLeft, Star, Trophy, Medal, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import BottomNav from "@/components/ui/BottomNav";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,6 +24,12 @@ export default function LeaderboardClient({
   currentProfile: LeaderUser;
 }) {
   const [tab, setTab] = useState<"sharers" | "finders">("sharers");
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  function handleRefresh() {
+    startTransition(() => router.refresh());
+  }
 
   const list   = tab === "sharers" ? sharers : finders;
   const top3   = list.slice(0, 3);
@@ -35,16 +42,23 @@ export default function LeaderboardClient({
       {/* Header */}
       <div className="bg-gradient-to-br from-[#22956b] to-[#1a7a58] pt-12 pb-6 px-5">
         <div className="flex items-center gap-3 mb-5">
-          <Link href="/map" className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white">
+          <Link href="/map" className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div>
+          <div className="flex-1">
             <h1 className="text-white font-black text-xl flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-300 fill-yellow-300" />
               Leaderboard
             </h1>
             <p className="text-white/60 text-xs">Top conducteurs SwiftPark</p>
           </div>
+          <button
+            onClick={handleRefresh}
+            disabled={isPending}
+            className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white shrink-0"
+          >
+            <RefreshCw className={`w-4 h-4 ${isPending ? "animate-spin" : ""}`} />
+          </button>
         </div>
 
         {/* Tabs */}
