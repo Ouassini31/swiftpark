@@ -1,10 +1,13 @@
 /**
- * SwiftPark — Service Worker
- * Gère les notifications push et le cache PWA
+ * SwiftPark — Service Worker v3
+ * Push notifications uniquement — pas de cache sur les pages de navigation
+ * (les redirects middleware causaient des boucles sur Safari/WebKit)
  */
 
-const CACHE_NAME = "swiftpark-v1";
-const STATIC_ASSETS = ["/", "/map", "/manifest.json", "/icon-192.png"];
+const CACHE_NAME = "swiftpark-v3";
+
+// Seuls les vrais assets statiques sont cachés (jamais les pages HTML)
+const STATIC_ASSETS = ["/manifest.json", "/icon-192.png", "/icon-512.png"];
 
 // ── Installation ──────────────────────────────────────────
 self.addEventListener("install", (event) => {
@@ -14,7 +17,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// ── Activation ────────────────────────────────────────────
+// ── Activation : purge tous les anciens caches ────────────
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -24,11 +27,21 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// ── Fetch (cache-first pour les assets statiques) ─────────
+// ── Fetch ─────────────────────────────────────────────────
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  if (event.request.url.includes("/api/") || event.request.url.includes("supabase")) return;
 
+  const url = new URL(event.request.url);
+
+  // API et Supabase → toujours réseau, jamais cache
+  if (url.pathname.startsWith("/api/") || url.hostname.includes("supabase")) return;
+
+  // Pages HTML (navigation) → toujours réseau pour que les redirects middleware fonctionnent
+  const isNavigation = event.request.mode === "navigate" ||
+    event.request.headers.get("accept")?.includes("text/html");
+  if (isNavigation) return;
+
+  // Assets statiques (icônes, manifest) → cache-first
   event.respondWith(
     caches.match(event.request).then((cached) => cached ?? fetch(event.request))
   );
@@ -69,21 +82,15 @@ self.addEventListener("notificationclick", (event) => {
   if (event.action === "dismiss") return;
 
   const data = event.notification.data ?? {};
-  let url = "/map";
-
-  if (data.reservation_id) url = "/reservations";
+  const url = data.reservation_id ? "/reservations" : "/map";
 
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clients) => {
         const existing = clients.find((c) => c.url.includes(self.location.origin));
-        if (existing) {
-          existing.focus();
-          existing.navigate(url);
-        } else {
-          self.clients.openWindow(url);
-        }
+        if (existing) { existing.focus(); existing.navigate(url); }
+        else self.clients.openWindow(url);
       })
   );
 });
