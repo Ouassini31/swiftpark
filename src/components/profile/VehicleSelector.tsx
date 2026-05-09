@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2, CheckCircle, Check, Info } from "lucide-react";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { getCategory } from "@/lib/vehicle";
-import { VEHICLE_BRANDS } from "@/lib/vehicleBrands";
 import { toast } from "sonner";
+import VehiclePicker from "@/components/vehicle/VehiclePicker";
 
 /* ─── Couleurs ─── */
 const COLORS = [
@@ -58,40 +58,40 @@ export default function VehicleSelector({ userId, initial }: Props) {
   const [category, setCategory] = useState<string>(initial.category ?? "compacte");
 
   /* UI */
-  const [models, setModels]           = useState<string[]>([]);
   const [loadingSpecs, setLoadingSpecs] = useState(false);
   const [autoDetected, setAutoDetected] = useState(false);
   const [hoveredColor, setHoveredColor] = useState<string | null>(null);
   const [saving, setSaving]           = useState(false);
   const [saved, setSaved]             = useState(false);
 
-  /* Modèles */
-  useEffect(() => {
-    if (!make) { setModels([]); return; }
-    fetch(`/api/vehicles?cmd=models&make=${encodeURIComponent(make)}`)
-      .then((r) => r.json())
-      .then((d) => setModels((d.Models ?? []).map((m: Record<string, string>) => m.model_name)))
-      .catch(() => {});
-  }, [make]);
-
-  /* Specs auto */
-  useEffect(() => {
-    if (!make || !model) return;
-    setLoadingSpecs(true);
+  /* Appelé par VehiclePicker quand un modèle est sélectionné */
+  function handleModelSelect(newMake: string, newModel: string, localLengthCm?: number) {
+    setMake(newMake);
+    setModel(newModel);
     setAutoDetected(false);
-    const y = year ? `&year=${year}` : "";
-    fetch(`/api/vehicles?cmd=trims&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}${y}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.length_cm) {
-          setLengthCm(d.length_cm);
-          setCategory(d.category ?? getCategory(d.length_cm));
-          setAutoDetected(true);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingSpecs(false));
-  }, [make, model, year]);
+
+    if (!newModel) return;
+
+    if (localLengthCm) {
+      setLengthCm(localLengthCm);
+      setCategory(getCategory(localLengthCm));
+      setAutoDetected(true);
+    } else if (newMake && newModel) {
+      setLoadingSpecs(true);
+      const y = year ? `&year=${year}` : "";
+      fetch(`/api/vehicles?cmd=trims&make=${encodeURIComponent(newMake)}&model=${encodeURIComponent(newModel)}${y}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.length_cm) {
+            setLengthCm(d.length_cm);
+            setCategory(d.category ?? getCategory(d.length_cm));
+            setAutoDetected(true);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoadingSpecs(false));
+    }
+  }
 
   function handleLengthChange(val: number) {
     setLengthCm(val);
@@ -136,36 +136,13 @@ export default function VehicleSelector({ userId, initial }: Props) {
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <p className="text-sm font-black text-gray-900">🚗 Mon véhicule</p>
 
-        {/* Marque */}
-        <div>
-          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Marque</label>
-          <input
-            list="profile-makes-list"
-            value={make}
-            onChange={(e) => { setMake(e.target.value); setModel(""); setAutoDetected(false); }}
-            placeholder="Renault, BYD, Tesla…"
-            className="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#22956b] focus:bg-white transition"
-          />
-          <datalist id="profile-makes-list">
-            {VEHICLE_BRANDS.map((m) => <option key={m} value={m} />)}
-          </datalist>
-        </div>
-
-        {/* Modèle */}
-        <div>
-          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Modèle</label>
-          <input
-            list="profile-models-list"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            placeholder={make ? "Golf, Clio, 308…" : "Choisis d'abord une marque"}
-            disabled={!make}
-            className="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#22956b] focus:bg-white transition disabled:opacity-40"
-          />
-          <datalist id="profile-models-list">
-            {models.map((m) => <option key={m} value={m} />)}
-          </datalist>
-        </div>
+        {/* Two-panel picker */}
+        <VehiclePicker
+          make={make}
+          model={model}
+          onMakeChange={(m) => { setMake(m); setModel(""); setAutoDetected(false); }}
+          onModelChange={(m, len) => handleModelSelect(make, m, len)}
+        />
 
         {/* Année */}
         <div>
