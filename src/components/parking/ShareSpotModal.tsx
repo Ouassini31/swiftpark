@@ -40,6 +40,7 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
       .select("id")
       .eq("sharer_id", profile.id)
       .in("status", ["available", "reserved"])
+      .gt("expires_at", new Date().toISOString()) // spots non expirés uniquement
       .limit(1)
       .maybeSingle();
 

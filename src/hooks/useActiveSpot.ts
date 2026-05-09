@@ -21,15 +21,31 @@ export function useActiveSpot() {
         .select("*")
         .eq("sharer_id", profile!.id)
         .in("status", ["available", "reserved"])
+        .gt("expires_at", new Date().toISOString()) // ← ignore les spots expirés
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
+
+      // Si le spot est expiré côté DB, on le marque comme tel
+      if (!data) {
+        // Nettoyer les vieux spots expirés en arrière-plan
+        supabase
+          .from("parking_spots")
+          .update({ status: "expired" })
+          .eq("sharer_id", profile!.id)
+          .in("status", ["available", "reserved"])
+          .lt("expires_at", new Date().toISOString())
+          .then(() => {});
+      }
+
       setActiveSpot(data ?? null);
     }
 
     fetchActiveSpot();
 
-    // Écouter les changements en temps réel
+    // Vérifier toutes les minutes si le spot actif vient d'expirer
+    const interval = setInterval(fetchActiveSpot, 60_000);
+
     const supabase = createClient();
     const channel = supabase
       .channel("active-spot")
@@ -41,7 +57,10 @@ export function useActiveSpot() {
       }, () => fetchActiveSpot())
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, [profile]);
 
   return { activeSpot, setActiveSpot };

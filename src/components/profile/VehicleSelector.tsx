@@ -257,8 +257,17 @@ export default function VehicleSelector({ userId, initial }: Props) {
 
       {/* ── Couleur ── */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-        <p className="text-sm font-black text-gray-900 mb-3">🎨 Couleur</p>
-        <div className="grid grid-cols-6 gap-2.5">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-black text-gray-900">🎨 Couleur</p>
+          <p className="text-xs font-bold text-gray-500 h-4">
+            {hoveredColor
+              ? COLORS.find(c => c.value === hoveredColor)?.label
+              : color
+              ? `${COLORS.find(c => c.value === color)?.label} ✓`
+              : ""}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
           {COLORS.map((c) => (
             <button
               key={c.value}
@@ -266,33 +275,24 @@ export default function VehicleSelector({ userId, initial }: Props) {
               onMouseEnter={() => setHoveredColor(c.value)}
               onMouseLeave={() => setHoveredColor(null)}
               title={c.label}
-              className={`relative w-full aspect-square rounded-xl border-[3px] transition-all active:scale-95 ${
-                color === c.value ? "scale-110 shadow-lg" : ""
+              className={`relative w-8 h-8 rounded-full border-[3px] transition-all active:scale-95 ${
+                color === c.value ? "scale-110 shadow-md" : ""
               }`}
               style={{
                 backgroundColor: c.hex,
-                borderColor: color === c.value ? "#22956b" : (c.border ?? "transparent"),
+                borderColor: color === c.value ? "#22956b" : (c.border ?? "#e5e7eb"),
               }}
             >
               {color === c.value && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Check
-                    className="w-3.5 h-3.5 drop-shadow"
+                    className="w-3 h-3 drop-shadow"
                     style={{ color: ["blanc", "argent", "beige", "jaune"].includes(c.value) ? "#22956b" : "#fff" }}
                   />
                 </div>
               )}
             </button>
           ))}
-        </div>
-        <div className="h-5 mt-2 flex items-center justify-center">
-          <p className="text-xs font-bold text-gray-600">
-            {hoveredColor
-              ? COLORS.find(c => c.value === hoveredColor)?.label
-              : color
-              ? `${COLORS.find(c => c.value === color)?.label} sélectionné ✓`
-              : ""}
-          </p>
         </div>
       </div>
 
