@@ -60,12 +60,17 @@ export default function MapClient() {
     if (filters.handicap && !s.is_handicap) return false;
     if (filters.vehicleType && s.vehicle_type !== filters.vehicleType) return false;
 
-    // Filtre arrivée : on garde les places dont expires_at est dans la fenêtre
-    // [arrivalMin - 10 min, arrivalMin + 50 min] autour de maintenant
+    // Filtre arrivée
+    // arrivalMin = 0 → "Maintenant" : on montre tout ce qui est encore dispo (pas de limite haute)
+    // arrivalMin > 0 → fenêtre [arrivalMin-10, arrivalMin+50] autour du moment d'arrivée
     const minsLeft = Math.round((new Date(s.expires_at).getTime() - Date.now()) / 60000);
-    const lo = Math.max(0, filters.arrivalMin - 10);
-    const hi = filters.arrivalMin + 50;
-    if (minsLeft < lo || minsLeft > hi) return false;
+    if (filters.arrivalMin === 0) {
+      if (minsLeft < 0) return false; // place déjà expirée
+    } else {
+      const lo = Math.max(0, filters.arrivalMin - 10);
+      const hi = filters.arrivalMin + 50;
+      if (minsLeft < lo || minsLeft > hi) return false;
+    }
 
     return true;
   });

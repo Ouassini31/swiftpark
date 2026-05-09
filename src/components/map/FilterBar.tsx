@@ -62,9 +62,13 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
     if (filters.handicap && !s.is_handicap) return false;
     if (filters.vehicleType && s.vehicle_type !== filters.vehicleType) return false;
     const minsLeft = Math.round((new Date(s.expires_at).getTime() - Date.now()) / 60000);
-    const lo = Math.max(0, filters.arrivalMin - 10);
-    const hi = filters.arrivalMin + 50;
-    if (minsLeft < lo || minsLeft > hi) return false;
+    if (filters.arrivalMin === 0) {
+      if (minsLeft < 0) return false;
+    } else {
+      const lo = Math.max(0, filters.arrivalMin - 10);
+      const hi = filters.arrivalMin + 50;
+      if (minsLeft < lo || minsLeft > hi) return false;
+    }
     return true;
   }).length;
 
