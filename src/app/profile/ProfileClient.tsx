@@ -223,6 +223,7 @@ export default function ProfileClient({
             color:     (profile as Record<string, unknown>).vehicle_color as string ?? "",
             length_cm: (profile as Record<string, unknown>).vehicle_length_cm as number | null ?? null,
             category:  (profile as Record<string, unknown>).vehicle_category as string | null ?? null,
+            plate:     (profile as Record<string, unknown>).vehicle_plate as string ?? "",
           }}
         />
 
