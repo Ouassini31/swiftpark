@@ -97,7 +97,7 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
         <>
           <div className="fixed inset-0 z-[900]" onClick={() => setOpen(false)} />
 
-          <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[1000] p-4 space-y-4">
+          <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[1000] p-4 space-y-4">
             <div className="flex items-center justify-between">
               <p className="font-black text-gray-900 text-sm">Filtres</p>
               {hasActive && (
