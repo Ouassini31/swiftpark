@@ -99,15 +99,20 @@ export default function MapHeader({ spotsCount, onLocate, onSearch, onShare, fil
         </div>
       </div>
 
-      {/* Pill "X places" */}
-      {spotsCount > 0 && (
-        <div className="flex justify-center mt-1 pointer-events-none">
-          <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-xl rounded-full px-4 py-1.5 text-xs font-bold text-gray-800 shadow-lg border border-white/50">
-            <span className="w-1.5 h-1.5 bg-[#22956b] rounded-full animate-pulse" />
-            {spotsCount} place{spotsCount > 1 ? "s" : ""} disponible{spotsCount > 1 ? "s" : ""}
-          </div>
+      {/* Pill "X places" — toujours visible */}
+      <div className="flex justify-center mt-1 pointer-events-none">
+        <div className={`flex items-center gap-1.5 backdrop-blur-xl rounded-full px-4 py-1.5 text-xs font-bold shadow-lg border transition-colors duration-500 ${
+          spotsCount > 0
+            ? "bg-white/95 text-gray-800 border-white/50"
+            : "bg-gray-100/90 text-gray-500 border-gray-200/50"
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${spotsCount > 0 ? "bg-[#22956b] animate-pulse" : "bg-gray-400"}`} />
+          {spotsCount > 0
+            ? `${spotsCount} place${spotsCount > 1 ? "s" : ""} disponible${spotsCount > 1 ? "s" : ""}`
+            : "Aucune place disponible"
+          }
         </div>
-      )}
+      </div>
     </div>
   );
 }

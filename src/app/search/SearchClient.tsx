@@ -209,8 +209,8 @@ function SpotCard({ spot }: { spot: Spot }) {
 
   return (
     <Link
-      href={`/map`}
-      className="block bg-white rounded-2xl shadow-sm p-4 hover:shadow-md transition"
+      href={`/map?lat=${spot.lat}&lng=${spot.lng}`}
+      className="block bg-white rounded-2xl shadow-sm p-4 hover:shadow-md transition active:scale-[.98]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">

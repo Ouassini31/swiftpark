@@ -46,8 +46,12 @@ export default function MapClient() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("share") === "1") setShowShare(true);
+      // Centre la carte sur une place venue de /search
+      const lat = parseFloat(params.get("lat") ?? "");
+      const lng = parseFloat(params.get("lng") ?? "");
+      if (!isNaN(lat) && !isNaN(lng)) setMapCenter(lat, lng, 17);
     }
-  }, []);
+  }, [setMapCenter]);
 
   function handleLocate() {
     if (userLat && userLng) setMapCenter(userLat, userLng, 16);
@@ -117,6 +121,32 @@ export default function MapClient() {
           </div>
         ))}
       </div>
+
+      {/* Empty state — 0 places visibles et géoloc active */}
+      {filteredSpots.length === 0 && userLat && !selectedSpot && !showShare && !showSearch && (
+        <div
+          className="absolute left-4 right-4 z-[700] bg-white/95 backdrop-blur-xl rounded-2xl px-4 py-3.5 shadow-lg border border-gray-100 flex items-center gap-3 transition-all duration-300"
+          style={{ bottom: activeSpot ? "268px" : "104px" }}
+        >
+          <div className="w-9 h-9 bg-[#e8f5ef] rounded-xl flex items-center justify-center shrink-0">
+            <span className="text-lg">🅿️</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-gray-900">Aucune place autour de toi</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {filters.arrivalMin > 0 || filters.maxPrice !== null
+                ? "Essaie d'élargir tes filtres"
+                : "Sois le premier à partager ta place 🚗"}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowShare(true)}
+            className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white text-xs font-bold rounded-xl"
+          >
+            Partager
+          </button>
+        </div>
+      )}
 
       {selectedSpot && <SpotSheet />}
       {showSearch && <SearchSpotSheet onClose={() => setShowSearch(false)} />}
