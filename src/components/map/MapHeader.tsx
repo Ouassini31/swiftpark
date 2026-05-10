@@ -44,8 +44,8 @@ export default function MapHeader({
         {/* Logo */}
         <div className="flex justify-center mb-3">
           <SwiftParkLogo
-            markSize={32}
-            fontSize={18}
+            markSize={44}
+            fontSize={22}
             color="#085041"
             accent="#22956b"
             pill
