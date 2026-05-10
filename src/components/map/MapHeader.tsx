@@ -7,6 +7,7 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import FilterBar, { type MapFilters } from "@/components/map/FilterBar";
 import { toast } from "sonner";
+import SwiftParkLogo from "@/components/ui/SwiftParkLogo";
 
 /* ── Design tokens ───────────────────────────────────────────────────── */
 const T = {
@@ -42,20 +43,13 @@ export default function MapHeader({
 
         {/* Logo */}
         <div className="flex justify-center mb-3">
-          <div
-            className="flex items-center gap-2 px-4 py-2 rounded-2xl shadow-sm"
-            style={{ background: "#fff", border: `1px solid ${T.divider}` }}
-          >
-            <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center"
-              style={{ background: T.accent }}
-            >
-              <span className="text-white text-xs font-black">P</span>
-            </div>
-            <span style={{ fontFamily: DM, fontSize: 16, fontWeight: 900, color: T.ink, letterSpacing: "-0.02em" }}>
-              Swift<span style={{ color: T.accent }}>Park</span>
-            </span>
-          </div>
+          <SwiftParkLogo
+            markSize={32}
+            fontSize={18}
+            color="#085041"
+            accent="#22956b"
+            pill
+          />
         </div>
 
         {/* Row 1: counter pill + right actions */}
