@@ -49,6 +49,7 @@ export default function MapHeader({
             color="#085041"
             accent="#22956b"
             pill
+            animated
           />
         </div>
 
