@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, UserPlus, ClipboardList, Trophy, User, X, Copy, Check } from "lucide-react";
+import { Map, UserPlus, ClipboardList, Trophy, User, X, Copy, Check, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/map",          label: "Carte",    icon: Map },
-  { href: "/reservations", label: "Trajets",  icon: ClipboardList },
+  { href: "/history",      label: "Trajets",  icon: History },
   { href: "#invite",       label: "Inviter",  icon: UserPlus, primary: true },
   { href: "/leaderboard",  label: "Top",      icon: Trophy },
   { href: "/profile",      label: "Profil",   icon: User },

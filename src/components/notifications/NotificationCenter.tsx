@@ -17,6 +17,8 @@ const NOTIF_ICONS: Record<string, string> = {
   reservation_expired:   "⏰",
   payment_received:      "💰",
   spot_validated:        "📍",
+  pre_departure:         "🕐",
+  refund:                "↩️",
 };
 
 export default function NotificationCenter() {

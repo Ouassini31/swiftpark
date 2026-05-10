@@ -37,12 +37,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Montant supérieur au solde disponible" }, { status: 400 });
     }
 
+    // Vérifier qu'il n'y a pas déjà une demande en attente
+    const { data: existing } = await supabase
+      .from("withdrawal_requests" as never)
+      .select("id")
+      .eq("user_id", user_id)
+      .eq("status", "pending")
+      .maybeSingle() as { data: { id: string } | null };
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Tu as déjà une demande de retrait en cours. Attends qu'elle soit traitée avant d'en faire une nouvelle." },
+        { status: 409 }
+      );
+    }
+
     // Débiter les SwiftCoins
     const { error: debitError } = await supabase.rpc("process_coin_transaction" as never, {
-      p_user_id: user_id,
-      p_amount: -amount,
-      p_type: "spend",
-      p_description: `💸 Retrait virement SEPA – ${amount}€`,
+      p_user_id:        user_id,
+      p_amount:         -amount,
+      p_type:           "spend",
+      p_description:    `💸 Retrait virement SEPA – ${amount}€`,
+      p_reservation_id: null,
     });
 
     if (debitError) {
@@ -52,11 +68,11 @@ export async function POST(req: NextRequest) {
     // Enregistrer la demande de retrait
     await supabase.from("withdrawal_requests" as never).insert({
       user_id,
-      amount_sc: amount,
-      amount_eur: amount,
-      iban: iban.replace(/\s/g, "").toUpperCase(),
+      amount_sc:    amount,
+      amount_eur:   amount,
+      iban:         iban.replace(/\s/g, "").toUpperCase(),
       account_name: name,
-      status: "pending",
+      status:       "pending",
     });
 
     return NextResponse.json({ success: true });

@@ -23,7 +23,6 @@ enabled = true
 
 [auth]
 enabled = true
-port = 54321
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["https://localhost:3000"]
 jwt_expiry = 3600

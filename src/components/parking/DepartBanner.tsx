@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin, LogOut, CheckCircle, Loader2, X, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LogOut, CheckCircle, Loader2 } from "lucide-react";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
 import { haversineDistance, GPS_VALIDATION_RADIUS_M } from "@/lib/utils";
@@ -11,25 +11,61 @@ import type { Database } from "@/types/database";
 
 type Spot = Database["public"]["Tables"]["parking_spots"]["Row"];
 
+export interface DepartResult {
+  earnedSC: number;
+  address:  string;
+}
+
 interface DepartBannerProps {
   spot: Spot;
-  onDone: () => void;
+  onDone: (result?: DepartResult) => void;
 }
 
 type Step = "idle" | "confirm" | "done";
 
+
+/* ── Design tokens ───────────────────────────────────────────────────── */
+const T = {
+  bg:      "#fafaf7",
+  surface: "#f4f4f0",
+  ink:     "#1a1a16",
+  muted:   "#aaa9a0",
+  divider: "#eeeee6",
+  accent:  "#22956b",
+  amber:   "#a07116",
+} as const;
+
+const DM = "var(--font-dm-sans), system-ui, sans-serif";
+const WINDOW_SEC = 30 * 60; // 30 min sharing window
+
+function fmtTimer(s: number) {
+  s = Math.max(0, Math.floor(s));
+  const m = (s / 60) | 0;
+  const r = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+}
 
 export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
   const { userLat, userLng, profile } = useMapStore();
   const [step, setStep]       = useState<Step>("idle");
   const [locating, setLocating] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [secsLeft, setSecsLeft] = useState(() =>
+    Math.max(0, Math.round((new Date(spot.expires_at).getTime() - Date.now()) / 1000))
+  );
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSecsLeft(Math.max(0, Math.round((new Date(spot.expires_at).getTime() - Date.now()) / 1000)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [spot.expires_at]);
 
   if (dismissed) return null;
 
-  const minsLeft = Math.max(0, Math.round(
-    (new Date(spot.expires_at).getTime() - Date.now()) / 60000
-  ));
+  const earningSC = Math.round(spot.coin_price * 0.75);
+  const ratio     = Math.max(0, Math.min(1, secsLeft / WINDOW_SEC));
+  const urgent    = secsLeft < 120;
 
   async function handleDepart() {
     setLocating(true);
@@ -112,20 +148,26 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
       toast(`Place libérée — pas de finder trouvé cette fois 🙁`, { icon: "📍" });
     }
 
-    // Marquer la place comme complétée
+    // Marquer la place comme complétée + sharer_confirmed pour stopper les nudges
     await supabase
       .from("parking_spots")
       .update({
-        status: "completed",
+        status:           "completed",
         sharer_validated: true,
-        sharer_gps_lat: lat,
-        sharer_gps_lng: lng,
-        validated_at: new Date().toISOString(),
+        sharer_confirmed: true,   // stoppe les nudges pré-départ
+        sharer_gps_lat:   lat,
+        sharer_gps_lng:   lng,
+        validated_at:     new Date().toISOString(),
       })
       .eq("id", spot.id);
 
     setStep("done");
-    setTimeout(() => { onDone(); }, 2000);
+    setTimeout(() => {
+      onDone(reservation ? {
+        earnedSC: reservation.sharer_receive,
+        address:  spot.address ?? `${spot.lat.toFixed(4)}, ${spot.lng.toFixed(4)}`,
+      } : undefined);
+    }, 2000);
   }
 
   // ── Étape "done" ──────────────────────────────────────────────────────
@@ -189,38 +231,86 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
   }
 
   // ── Étape "idle" — bannière persistante ──────────────────────────────
+  const address = spot.address
+    ? spot.address.split(",").slice(0, 2).join(",")
+    : `${spot.lat.toFixed(4)}, ${spot.lng.toFixed(4)}`;
+
   return (
-    <div className="absolute bottom-[88px] left-4 right-4 z-[820]">
-      <div className="bg-white rounded-2xl shadow-xl border border-[#22956b]/20 overflow-hidden">
-        {/* Barre verte en haut */}
-        <div className="h-1 bg-gradient-to-r from-[#22956b] to-[#1a7a58]" />
-        <div className="px-4 py-3 flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#e8f5ef] rounded-xl flex items-center justify-center shrink-0">
-            <MapPin className="w-4 h-4 text-[#22956b]" />
+    <div
+      className="absolute left-3 right-3 z-[820]"
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 80px)", fontFamily: DM }}
+    >
+      <div
+        className="rounded-[14px] overflow-hidden"
+        style={{ background: "#fff", border: `1px solid ${T.divider}` }}
+      >
+        {/* Thin progress bar */}
+        <div style={{ height: 2, background: T.divider }}>
+          <div
+            className="h-full transition-[width] duration-700 ease-out"
+            style={{ width: `${ratio * 100}%`, background: urgent ? T.amber : T.accent }}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 px-4 py-3.5">
+          {/* Timer */}
+          <div className="flex flex-col shrink-0">
+            <span
+              style={{
+                fontSize: 10, fontWeight: 300, letterSpacing: "0.08em",
+                textTransform: "uppercase", color: T.muted,
+              }}
+            >
+              Place active
+            </span>
+            <span
+              style={{
+                marginTop: 2,
+                fontSize: 26,
+                fontWeight: 300,
+                lineHeight: 1,
+                letterSpacing: "-0.03em",
+                fontVariantNumeric: "tabular-nums",
+                color: urgent ? T.amber : T.ink,
+              }}
+            >
+              {fmtTimer(secsLeft)}
+            </span>
           </div>
+
+          {/* Address + earning */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-black text-gray-900">Place active partagée</p>
-            <div className="flex items-center gap-1 mt-0.5">
-              <Clock className="w-3 h-3 text-gray-400" />
-              <p className="text-xs text-gray-500">
-                {minsLeft > 0 ? `Expire dans ${minsLeft} min` : "Expirée"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setStep("confirm")}
-              className="px-3.5 py-2 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white text-xs font-bold rounded-xl shadow-lg shadow-[#22956b]/30 transition active:scale-95 whitespace-nowrap"
+            <p
+              className="truncate"
+              style={{ fontSize: 13, fontWeight: 400, color: T.ink, letterSpacing: "-0.005em" }}
             >
-              Je pars 🚗
-            </button>
-            <button
-              onClick={() => setDismissed(true)}
-              className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-400"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+              {address}
+            </p>
+            <p style={{ fontSize: 11.5, fontWeight: 300, color: T.muted, marginTop: 2 }}>
+              + {earningSC} SC accumulés
+            </p>
           </div>
+
+          {/* CTA */}
+          <button
+            type="button"
+            onClick={() => setStep("confirm")}
+            className="shrink-0 inline-flex items-center gap-1.5 transition active:scale-[0.97]"
+            style={{
+              height: 44,
+              paddingLeft: 16,
+              paddingRight: 16,
+              borderRadius: 14,
+              background: T.accent,
+              color: "#fff",
+              fontSize: 14,
+              fontWeight: 400,
+              letterSpacing: "-0.005em",
+              fontFamily: DM,
+            }}
+          >
+            Je pars <span aria-hidden style={{ fontSize: 14 }}>🚗</span>
+          </button>
         </div>
       </div>
     </div>

@@ -152,9 +152,9 @@ export default function ReservationsClient({
             role={gpsTarget.finder_id === currentUserId ? "finder" : "sharer"}
             spotLat={gpsTarget.parking_spots?.lat}
             spotLng={gpsTarget.parking_spots?.lng}
+            spotAddress={gpsTarget.parking_spots?.address}
             onValidated={() => {
               setGpsTarget(null);
-              toast.success("Position validée !");
               window.location.reload();
             }}
           />

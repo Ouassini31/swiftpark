@@ -7,25 +7,30 @@ import { useMapStore } from "@/store/useMapStore";
 import { haversineDistance, GPS_VALIDATION_RADIUS_M } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
+import GPSSuccess from "@/components/map/GPSSuccess";
 
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
 
 interface GpsValidationProps {
-  reservation: Reservation;
-  role: "sharer" | "finder";
-  spotLat: number;
-  spotLng: number;
-  onValidated: () => void;
+  reservation:  Reservation;
+  role:         "sharer" | "finder";
+  spotLat:      number;
+  spotLng:      number;
+  spotAddress?: string;
+  onValidated:  () => void;
 }
 
 type ValidationState = "idle" | "locating" | "success" | "failed";
 
 export default function GpsValidation({
-  reservation, role, spotLat, spotLng, onValidated,
+  reservation, role, spotLat, spotLng, spotAddress, onValidated,
 }: GpsValidationProps) {
   const { userLat, userLng } = useMapStore();
-  const [state, setState] = useState<ValidationState>("idle");
+  const [state, setState]       = useState<ValidationState>("idle");
   const [distance, setDistance] = useState<number | null>(null);
+  const [celebration, setCelebration] = useState<{
+    isFirst: boolean; earned: number;
+  } | null>(null);
 
   useEffect(() => {
     if (userLat && userLng) {
@@ -42,7 +47,6 @@ export default function GpsValidation({
 
     setState("locating");
 
-    // Haute précision
     const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
@@ -64,16 +68,15 @@ export default function GpsValidation({
 
     const supabase = createClient();
 
-    // Enregistrer la validation GPS
     await supabase.from("gps_validations").insert({
-      reservation_id: reservation.id,
-      user_id: role === "sharer" ? reservation.sharer_id : reservation.finder_id,
+      reservation_id:    reservation.id,
+      user_id:           role === "sharer" ? reservation.sharer_id : reservation.finder_id,
       role,
-      lat: pos.coords.latitude,
-      lng: pos.coords.longitude,
-      accuracy: pos.coords.accuracy,
-      distance_to_spot: dist,
-      is_valid: isValid,
+      lat:               pos.coords.latitude,
+      lng:               pos.coords.longitude,
+      accuracy:          pos.coords.accuracy,
+      distance_to_spot:  dist,
+      is_valid:          isValid,
     });
 
     if (!isValid) {
@@ -82,17 +85,15 @@ export default function GpsValidation({
       return;
     }
 
-    // Mettre à jour la place
+    // Mettre à jour les flags GPS sur la place
     const updateField =
-      role === "sharer" ? { sharer_validated: true, sharer_gps_lat: pos.coords.latitude, sharer_gps_lng: pos.coords.longitude }
-                        : { finder_validated: true, finder_gps_lat: pos.coords.latitude, finder_gps_lng: pos.coords.longitude };
+      role === "sharer"
+        ? { sharer_validated: true, sharer_gps_lat: pos.coords.latitude, sharer_gps_lng: pos.coords.longitude }
+        : { finder_validated: true, finder_gps_lat: pos.coords.latitude, finder_gps_lng: pos.coords.longitude };
 
-    await supabase
-      .from("parking_spots")
-      .update(updateField)
-      .eq("id", reservation.spot_id);
+    await supabase.from("parking_spots").update(updateField).eq("id", reservation.spot_id);
 
-    // Vérifier si les deux ont validé → compléter
+    // Vérifier si les deux ont validé → compléter la réservation
     const { data: spot } = await supabase
       .from("parking_spots")
       .select("sharer_validated, finder_validated")
@@ -100,33 +101,67 @@ export default function GpsValidation({
       .single();
 
     if (spot?.sharer_validated && spot?.finder_validated) {
-      // Compléter la réservation
-      await supabase
+      // Guard : mettre à jour uniquement si la réservation est encore "reserved"
+      // (évite le double-paiement si DepartBanner a déjà complété la réservation)
+      const { data: updatedRes } = await supabase
         .from("reservations")
         .update({ status: "completed", completed_at: new Date().toISOString() })
-        .eq("id", reservation.id);
+        .eq("id", reservation.id)
+        .eq("status", "reserved") // ← atomique : ne touche rien si déjà completed
+        .select("id")
+        .maybeSingle();
 
-      await supabase
-        .from("parking_spots")
-        .update({ status: "completed", validation_status: "validated", validated_at: new Date().toISOString() })
-        .eq("id", reservation.spot_id);
+      if (updatedRes) {
+        // Seulement si c'est nous qui avons transitionné vers "completed"
+        await supabase
+          .from("parking_spots")
+          .update({ status: "completed", validation_status: "validated", validated_at: new Date().toISOString() })
+          .eq("id", reservation.spot_id);
 
-      // Créditer le sharer
-      await supabase.rpc("process_coin_transaction", {
-        p_user_id: reservation.sharer_id,
-        p_amount: reservation.sharer_receive,
-        p_type: "earn",
-        p_description: `Gain place partagée — ${reservation.sharer_receive} SC`,
-        p_reservation_id: reservation.id,
-      });
-
-      toast.success("✅ Transaction validée ! Les SwiftCoins ont été transférés.");
+        await supabase.rpc("process_coin_transaction", {
+          p_user_id:        reservation.sharer_id,
+          p_amount:         reservation.sharer_receive,
+          p_type:           "earn",
+          p_description:    `Gain place partagée — ${reservation.sharer_receive} SC`,
+          p_reservation_id: reservation.id,
+        });
+      }
     }
 
     setState("success");
+
+    // ── Finder : célébration GPSSuccess ───────────────────────────────
+    if (role === "finder") {
+      const isFirst = !localStorage.getItem("sp_first_find");
+      if (isFirst) localStorage.setItem("sp_first_find", "1");
+      setCelebration({ isFirst, earned: 0 });
+      // onValidated() sera appelé depuis GPSSuccess.onContinue
+      return;
+    }
+
+    // Sharer : callback direct (DepartBanner gère son propre feedback)
     onValidated();
   }
 
+  // ── Écran de célébration finder ────────────────────────────────────
+  if (celebration) {
+    return (
+      <div className="fixed inset-0 z-[970]">
+        <GPSSuccess
+          earnedSC={celebration.earned}
+          address={spotAddress ?? `${spotLat.toFixed(4)}, ${spotLng.toFixed(4)}`}
+          isFirst={celebration.isFirst}
+          role="finder"
+          onContinue={() => {
+            setCelebration(null);
+            onValidated();
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── Formulaire de validation GPS ───────────────────────────────────
   return (
     <div className="bg-white rounded-3xl shadow-2xl p-6 mx-4 space-y-5">
       <div className="text-center">
@@ -139,7 +174,6 @@ export default function GpsValidation({
         </p>
       </div>
 
-      {/* Distance actuelle */}
       {distance !== null && (
         <div className={`flex items-center gap-3 p-3 rounded-2xl ${
           distance <= GPS_VALIDATION_RADIUS_M ? "bg-brand-50" : "bg-orange-50"
@@ -149,19 +183,14 @@ export default function GpsValidation({
             <p className="text-xs font-medium text-gray-700">Distance à la place</p>
             <p className={`text-lg font-black ${
               distance <= GPS_VALIDATION_RADIUS_M ? "text-brand-600" : "text-orange-500"
-            }`}>
-              {distance} m
-            </p>
+            }`}>{distance} m</p>
           </div>
-          {distance <= GPS_VALIDATION_RADIUS_M ? (
-            <CheckCircle className="w-5 h-5 text-brand-600 ml-auto" />
-          ) : (
-            <span className="ml-auto text-xs text-orange-500">Rapprochez-vous</span>
-          )}
+          {distance <= GPS_VALIDATION_RADIUS_M
+            ? <CheckCircle className="w-5 h-5 text-brand-600 ml-auto" />
+            : <span className="ml-auto text-xs text-orange-500">Rapprochez-vous</span>}
         </div>
       )}
 
-      {/* Résultat */}
       {state === "success" && (
         <div className="flex items-center gap-2 p-3 bg-green-50 rounded-2xl">
           <CheckCircle className="w-5 h-5 text-green-600" />
@@ -175,7 +204,6 @@ export default function GpsValidation({
         </div>
       )}
 
-      {/* CTA */}
       {state !== "success" && (
         <button
           onClick={validate}
@@ -184,15 +212,9 @@ export default function GpsValidation({
             transition disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {state === "locating" ? (
-            <>
-              <Loader className="w-5 h-5 animate-spin" />
-              Localisation…
-            </>
+            <><Loader className="w-5 h-5 animate-spin" /> Localisation…</>
           ) : (
-            <>
-              <MapPin className="w-5 h-5" />
-              Valider ma position
-            </>
+            <><MapPin className="w-5 h-5" /> Valider ma position</>
           )}
         </button>
       )}

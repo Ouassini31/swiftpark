@@ -82,7 +82,8 @@ self.addEventListener("notificationclick", (event) => {
   if (event.action === "dismiss") return;
 
   const data = event.notification.data ?? {};
-  const url = data.reservation_id ? "/reservations" : "/map";
+  // Priorité : url explicite > reservation_id > /map
+  const url = data.url ?? (data.reservation_id ? "/reservations" : "/map");
 
   event.waitUntil(
     self.clients

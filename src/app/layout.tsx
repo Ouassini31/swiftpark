@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter   = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const dmSans  = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", weight: ["300", "400"] });
 
 export const metadata: Metadata = {
   title: "SwiftPark — Trouvez une place en temps réel",
@@ -34,7 +35,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={inter.variable} data-theme="light">
+    <html lang="fr" className={`${inter.variable} ${dmSans.variable}`} data-theme="light">
       <body className="antialiased">
         {children}
         <Toaster position="top-center" richColors />
