@@ -257,7 +257,7 @@ export default function MapClient() {
       {filteredSpots.length === 0 && userLat && !selectedSpot && !showShare && !showSearch && (
         <div
           className="absolute left-4 right-4 z-[700] bg-white/95 backdrop-blur-xl rounded-2xl px-4 py-3.5 shadow-lg border border-gray-100 flex items-center gap-3 transition-all duration-300"
-          style={{ bottom: bannerActive ? "268px" : "104px" }}
+          style={{ bottom: bannerActive ? "268px" : "224px" }}
         >
           <div className="w-9 h-9 bg-[#e8f5ef] rounded-xl flex items-center justify-center shrink-0">
             <span className="text-lg">🅿️</span>

@@ -40,8 +40,15 @@ export default function MapHeader({
     <div className="absolute top-0 left-0 right-0 z-[800] pointer-events-none" style={{ fontFamily: DM }}>
       <div className="px-4 pt-safe-top pt-12 pb-3 pointer-events-auto">
 
-        {/* Row 1: counter pill + right actions */}
-        <div className="flex items-center justify-between mb-2.5">
+        {/* Row 1: counter pill + logo (center) + right actions */}
+        <div className="flex items-center justify-between mb-2.5 relative">
+
+          {/* Logo centré */}
+          <div className="absolute left-0 right-0 flex justify-center pointer-events-none">
+            <span className="text-sm font-black tracking-tight" style={{ fontFamily: DM, color: T.ink }}>
+              Swift<span style={{ color: T.accent }}>Park</span>
+            </span>
+          </div>
 
           {/* Counter pill */}
           <div
