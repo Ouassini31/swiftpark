@@ -85,7 +85,9 @@ export default function WalletClient({
     }
   }
 
-  const balance = profile?.coin_balance ?? 0;
+  const balance      = profile?.coin_balance ?? 0;
+  const bonusBalance = (profile as Record<string, unknown>)?.bonus_balance as number ?? 0;
+  const realBalance  = Math.max(0, balance - bonusBalance);
   const displayPacks = packs.length > 0 ? packs : DEFAULT_PACKS;
 
   return (
@@ -139,6 +141,20 @@ export default function WalletClient({
             </span>
           </div>
           <p className="text-white/60 text-sm mt-1">SwiftCoins disponibles</p>
+
+          {/* Split réel / bonus */}
+          {bonusBalance > 0 && (
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <div className="bg-white/15 rounded-xl px-3 py-1.5 text-center">
+                <p className="text-white font-black text-sm">{realBalance} SC</p>
+                <p className="text-white/60 text-[10px]">Retirables 💸</p>
+              </div>
+              <div className="bg-white/15 rounded-xl px-3 py-1.5 text-center">
+                <p className="text-white font-black text-sm">{bonusBalance} SC</p>
+                <p className="text-white/60 text-[10px]">Bonus 🎁</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
@@ -159,19 +175,24 @@ export default function WalletClient({
           </div>
         </div>
 
-        {/* Bouton retrait */}
-        {balance >= 20 && (
+        {/* Bouton retrait — uniquement sur SC réels */}
+        {realBalance >= 20 && (
           <Link
             href="/withdraw"
             className="mt-5 w-full py-3 bg-white/20 border border-white/30 rounded-2xl flex items-center justify-center gap-2 text-white font-bold text-sm active:scale-95 transition"
           >
             <Banknote className="w-4 h-4" />
-            Retirer mes SC en euros
+            Retirer {realBalance} SC en euros
           </Link>
         )}
-        {balance > 0 && balance < 20 && (
+        {realBalance > 0 && realBalance < 20 && (
           <p className="mt-4 text-center text-white/50 text-xs">
-            Encore {20 - balance} SC avant de pouvoir retirer
+            Encore {20 - realBalance} SC réels avant de pouvoir retirer
+          </p>
+        )}
+        {realBalance === 0 && balance > 0 && (
+          <p className="mt-4 text-center text-white/50 text-xs">
+            Partage des places pour gagner des SC retirables 🚗
           </p>
         )}
       </div>
@@ -184,9 +205,9 @@ export default function WalletClient({
             <Banknote className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="text-white font-black text-sm">1 SC = 1€ de cashback</p>
+            <p className="text-white font-black text-sm">1 SC réel = 1€ de cashback</p>
             <p className="text-white/70 text-xs mt-0.5">
-              Dès 20 SC, retire-les en euros sur ton compte bancaire.
+              SC gagnés en partageant → retirables dès 20 SC. Bonus inscription/parrainage → à dépenser sur SwiftPark.
             </p>
           </div>
         </div>
@@ -298,7 +319,8 @@ function PackCard({
 
 /* ── TransactionRow ───────────────────────────────────────────────────── */
 function TransactionRow({ tx }: { tx: Transaction }) {
-  const isPositive = tx.amount > 0;
+  const isPositive    = tx.amount > 0;
+  const isWithdrawable = (tx as Record<string, unknown>).is_withdrawable !== false;
 
   return (
     <div className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-sm">
@@ -307,7 +329,14 @@ function TransactionRow({ tx }: { tx: Transaction }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate">{tx.description}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-semibold text-gray-800 truncate">{tx.description}</p>
+          {isPositive && !isWithdrawable && (
+            <span className="shrink-0 text-[9px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">
+              BONUS
+            </span>
+          )}
+        </div>
         <p className="text-xs text-gray-400">
           {format(new Date(tx.created_at), "d MMM · HH:mm", { locale: fr })}
         </p>

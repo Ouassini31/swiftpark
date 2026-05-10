@@ -44,13 +44,13 @@ export async function POST(req: NextRequest) {
     // +5 SC au filleul
     await supabase.rpc("process_coin_transaction" as never, {
       p_user_id: user_id, p_amount: 5,
-      p_type: "bonus", p_description: "🎁 Bonus parrainage SwiftPark",
+      p_type: "bonus", p_description: "🎁 Bonus parrainage SwiftPark", p_is_withdrawable: false,
     });
 
     // +5 SC au parrain
     await supabase.rpc("process_coin_transaction" as never, {
       p_user_id: referrer.id, p_amount: 5,
-      p_type: "bonus", p_description: "🤝 Tu as parrainé un ami !",
+      p_type: "bonus", p_description: "🤝 Tu as parrainé un ami !", p_is_withdrawable: false,
     });
 
     return NextResponse.json({ success: true });

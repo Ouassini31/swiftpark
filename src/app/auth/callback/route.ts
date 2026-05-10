@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).rpc("process_coin_transaction", {
           p_user_id: user.id, p_amount: 5,
-          p_type: "bonus", p_description: "🎁 Bonus de bienvenue SwiftPark",
+          p_type: "bonus", p_description: "🎁 Bonus de bienvenue SwiftPark", p_is_withdrawable: false,
         });
       }
 
