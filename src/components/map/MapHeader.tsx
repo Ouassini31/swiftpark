@@ -41,10 +41,21 @@ export default function MapHeader({
       <div className="px-4 pt-safe-top pt-12 pb-3 pointer-events-auto">
 
         {/* Logo */}
-        <div className="flex justify-center mb-2">
-          <span className="text-sm font-black tracking-tight" style={{ fontFamily: DM, color: T.ink }}>
-            Swift<span style={{ color: T.accent }}>Park</span>
-          </span>
+        <div className="flex justify-center mb-3">
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl shadow-sm"
+            style={{ background: "#fff", border: `1px solid ${T.divider}` }}
+          >
+            <div
+              className="w-6 h-6 rounded-lg flex items-center justify-center"
+              style={{ background: T.accent }}
+            >
+              <span className="text-white text-xs font-black">P</span>
+            </div>
+            <span style={{ fontFamily: DM, fontSize: 16, fontWeight: 900, color: T.ink, letterSpacing: "-0.02em" }}>
+              Swift<span style={{ color: T.accent }}>Park</span>
+            </span>
+          </div>
         </div>
 
         {/* Row 1: counter pill + right actions */}
