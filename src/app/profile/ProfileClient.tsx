@@ -35,9 +35,34 @@ export default function ProfileClient({
   userId: string;
 }) {
   const router = useRouter();
-  const [editing, setEditing]   = useState(false);
-  const [fullName, setFullName] = useState(profile?.full_name ?? "");
-  const [saving, setSaving]     = useState(false);
+  const [editing, setEditing]     = useState(false);
+  const [fullName, setFullName]   = useState(profile?.full_name ?? "");
+  const [saving, setSaving]       = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? "");
+  const [uploading, setUploading] = useState(false);
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext  = file.name.split(".").pop();
+      const path = `avatars/${profile.id}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${data.publicUrl}?t=${Date.now()}`; // cache bust
+      await supabase.from("profiles").update({ avatar_url: url }).eq("id", profile.id);
+      setAvatarUrl(url);
+      toast.success("Photo mise à jour ✅");
+    } catch {
+      toast.error("Erreur lors de l'upload");
+    }
+    setUploading(false);
+  }
 
   async function handleSave() {
     if (!profile) return;
@@ -100,9 +125,30 @@ export default function ProfileClient({
 
         {/* Avatar + infos — compacte */}
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center shrink-0">
-            <span className="text-xl font-black text-white">{initials}</span>
-          </div>
+          {/* Photo voiture cliquable */}
+          <label className="relative shrink-0 cursor-pointer" title="Ajouter la photo de ta voiture">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+            <div className="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center overflow-hidden">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="Photo de ta voiture" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xl font-black text-white">{initials}</span>
+              )}
+            </div>
+            {/* Indicateur d'upload */}
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
+              {uploading
+                ? <Loader2 className="w-3 h-3 text-[#22956b] animate-spin" />
+                : <Edit2 className="w-2.5 h-2.5 text-[#22956b]" />
+              }
+            </div>
+          </label>
           <div className="flex-1 min-w-0">
             {editing ? (
               <input
@@ -130,10 +176,17 @@ export default function ProfileClient({
             )}
           </div>
         </div>
+
+        {/* Hint photo voiture */}
+        {!avatarUrl && (
+          <p className="text-white/50 text-[10px] mt-2.5 text-center">
+            📷 Appuie sur l&apos;icône pour ajouter la photo de ta voiture
+          </p>
+        )}
       </div>
 
       {/* ── Stats rapides ────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3 px-4 -mt-4">
+      <div className="grid grid-cols-3 gap-3 px-4 mt-3">
         <StatCard
           icon={<Zap className="w-5 h-5 text-[#f5a623] fill-[#f5a623]" />}
           label="SwiftCoins"

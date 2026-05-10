@@ -104,6 +104,7 @@ interface SharerVehicle {
   spots_shared:      number | null;
   full_name:         string | null;
   username:          string | null;
+  avatar_url:        string | null;
 }
 
 /* ── Component ───────────────────────────────────────────────────────── */
@@ -118,7 +119,7 @@ export default function SpotSheet() {
     const supabase = createClient();
     supabase
       .from("profiles" as never)
-      .select("vehicle_make, vehicle_model, vehicle_color, vehicle_length_cm, vehicle_category, spots_shared, full_name, username")
+      .select("vehicle_make, vehicle_model, vehicle_color, vehicle_length_cm, vehicle_category, spots_shared, full_name, username, avatar_url")
       .eq("id", selectedSpot.sharer_id)
       .single()
       .then(({ data }: { data: unknown }) => setSharerVehicle((data as SharerVehicle) ?? null));
@@ -363,6 +364,24 @@ export default function SpotSheet() {
               </div>
             )}
           </div>
+
+          {/* Photo de la voiture du partageur */}
+          {sharerVehicle?.avatar_url && (
+            <div className="mt-3 rounded-2xl overflow-hidden" style={{ border: `1px solid ${T.divider}` }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={sharerVehicle.avatar_url}
+                alt="Photo du véhicule"
+                className="w-full object-cover"
+                style={{ maxHeight: 180 }}
+              />
+              <div className="px-3 py-2" style={{ background: T.surface }}>
+                <p style={{ fontSize: 11, fontWeight: 300, letterSpacing: "0.06em", textTransform: "uppercase", color: T.muted }}>
+                  Photo du véhicule · confirme visuellement
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Detail rows */}
           <dl className="mt-3">
