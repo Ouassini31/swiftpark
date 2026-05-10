@@ -234,7 +234,8 @@ export default function MapClient() {
         </div>
       )}
 
-      {/* Légende temporelle */}
+      {/* Légende temporelle — cachée quand aucune place */}
+      {filteredSpots.length > 0 && (
       <div
         className="absolute left-3 z-[700] bg-white/90 backdrop-blur-xl rounded-2xl px-3 py-2.5 shadow-lg border border-white/50 space-y-1.5 transition-all duration-300"
         style={{ bottom: bannerActive ? "260px" : "96px" }}
@@ -252,12 +253,13 @@ export default function MapClient() {
           </div>
         ))}
       </div>
+      )}
 
       {/* Empty state */}
       {filteredSpots.length === 0 && userLat && !selectedSpot && !showShare && !showSearch && (
         <div
           className="absolute left-4 right-4 z-[700] bg-white/95 backdrop-blur-xl rounded-2xl px-4 py-3.5 shadow-lg border border-gray-100 flex items-center gap-3 transition-all duration-300"
-          style={{ bottom: bannerActive ? "268px" : "224px" }}
+          style={{ bottom: bannerActive ? "268px" : "104px" }}
         >
           <div className="w-9 h-9 bg-[#e8f5ef] rounded-xl flex items-center justify-center shrink-0">
             <span className="text-lg">🅿️</span>
