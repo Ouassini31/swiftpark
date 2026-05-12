@@ -95,7 +95,7 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
           <div className="flex items-start justify-between mb-5">
             <div>
               <h2 className="text-lg font-black text-gray-900">Je viens de me garer</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Partage l'info · Gagne des SwiftCoins</p>
+              <p className="text-xs text-gray-500 mt-0.5">Signale ton départ · Gagne des SwiftCoins</p>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shrink-0 transition active:scale-90">
               <X className="w-4 h-4" />
@@ -174,7 +174,7 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
             className="w-full py-4 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-black text-sm rounded-2xl shadow-lg shadow-[#22956b]/30 disabled:opacity-40 flex items-center justify-center gap-2 transition active:scale-[.98]"
           >
             <MapPin className="w-4 h-4" />
-            {loading ? "Publication…" : "Partager ma place"}
+            {loading ? "Publication…" : "Signaler mon départ"}
           </button>
         </div>
       </div>

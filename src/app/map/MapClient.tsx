@@ -269,7 +269,7 @@ export default function MapClient() {
             <p className="text-xs text-gray-400 mt-0.5">
               {filters.arrivalMin > 0 || filters.maxPrice !== null || filters.vehicleCategory
                 ? "Essaie d'élargir tes filtres"
-                : "Sois le premier à partager ta place 🚗"}
+                : "Sois le premier à signaler ton départ 🚗"}
             </p>
           </div>
           <button

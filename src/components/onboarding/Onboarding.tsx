@@ -13,8 +13,8 @@ const SLIDES = [
   {
     emoji: "💰",
     bg: "bg-yellow-50",
-    title: "Partage l'info,\nreçois une récompense",
-    desc: "Tu quittes une place ? Partage l'information. Un conducteur te récompense en SwiftCoins.",
+    title: "Signale ton départ,\nreçois une récompense",
+    desc: "Tu quittes une place ? Signale ton départ en 1 tap. L'info est récompensée en SwiftCoins.",
     pushSlide: false,
   },
   {

@@ -30,7 +30,7 @@ function InviteSheet({ onClose, referralCode }: { onClose: () => void; referralC
     if (navigator.share) {
       await navigator.share({
         title: "SwiftPark",
-        text: "Trouve une place de parking en 1 clic grâce à des conducteurs qui partagent leur place en temps réel 🅿️",
+        text: "SwiftPark connecte les conducteurs qui signalent leur départ avec ceux qui cherchent une place — en temps réel 🅿️",
         url: link,
       });
     } else {

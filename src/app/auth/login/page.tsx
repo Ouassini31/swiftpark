@@ -109,7 +109,7 @@ export default function LoginPage() {
           </svg>
         </div>
         <h1 className="text-[26px] font-black text-[var(--t,#111)]">SwiftPark</h1>
-        <p className="text-[13px] text-[var(--t2,#555)] mt-1">Partage l'info · Trouve ta place</p>
+        <p className="text-[13px] text-[var(--t2,#555)] mt-1">L'info en temps réel · Trouve ta place</p>
       </div>
 
       {/* Formulaire enveloppé dans Suspense (requis par useSearchParams) */}

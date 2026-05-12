@@ -57,7 +57,7 @@ export default function OGImage() {
         }}>
           <span style={{ color: "#F4B400", fontSize: 16, marginRight: 8 }}>⚡</span>
           <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, fontWeight: 600, letterSpacing: "0.06em" }}>
-            PARKING PARTAGÉ EN TEMPS RÉEL
+            L'INFORMATION QUI LIBÈRE UNE PLACE
           </span>
         </div>
 
@@ -99,7 +99,7 @@ export default function OGImage() {
           lineHeight: 1.4,
           margin: 0,
         }}>
-          Trouve une place · Partage la tienne · Gagne des SwiftCoins
+          Signale ton départ · Trouve une place · Gagne des SwiftCoins
         </p>
 
         {/* Stats row */}

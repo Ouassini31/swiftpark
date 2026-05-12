@@ -137,7 +137,7 @@ export default function HistoryClient({ found, shared, profile }: Props) {
           <div className="bg-white/15 rounded-2xl p-4">
             <div className="flex items-center gap-1.5 mb-1">
               <TrendingUp className="w-3.5 h-3.5 text-white/60" />
-              <span className="text-white/60 text-xs font-medium">Places partagées</span>
+              <span className="text-white/60 text-xs font-medium">Départs signalés</span>
             </div>
             <p className="text-white font-black text-2xl">{profile?.spots_shared ?? shared.length}</p>
             {topShared && (
@@ -274,8 +274,8 @@ export default function HistoryClient({ found, shared, profile }: Props) {
                 <EmptyState
                   icon="🅿️"
                   title="Aucune place partagée"
-                  sub="Partage ta place quand tu pars pour gagner des SC."
-                  cta="Partager une place"
+                  sub="Signale ton départ quand tu pars pour gagner des SC."
+                  cta="Signaler mon départ"
                   href="/map?share=1"
                 />
               )

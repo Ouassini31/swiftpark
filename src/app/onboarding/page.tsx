@@ -1,138 +1,107 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, MapPin, Navigation, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-const SLIDES = [
-  {
-    icon: (
-      <div className="w-24 h-24 bg-gradient-to-br from-[#22956b] to-[#085041] rounded-[28px] flex items-center justify-center shadow-2xl shadow-[#22956b]/40 mx-auto">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-      </div>
-    ),
-    tag: "Bienvenue 👋",
-    title: "Fini de tourner\nen rond",
-    sub: "SwiftPark connecte les conducteurs qui partent avec ceux qui cherchent une place — en temps réel.",
-    bg: "from-[#e8f5ef] to-[#f5f5f2]",
-  },
-  {
-    icon: (
-      <div className="w-24 h-24 bg-gradient-to-br from-[#f59e0b] to-[#d97706] rounded-[28px] flex items-center justify-center shadow-2xl shadow-amber-500/40 mx-auto">
-        <MapPin className="w-11 h-11 text-white" strokeWidth={2.2} />
-      </div>
-    ),
-    tag: "Tu pars 🚗",
-    title: "Partage ta place,\ngagne des coins",
-    sub: "Tu quittes ta place de parking ? Partage l'info en 1 tap et sois récompensé en SwiftCoins dès qu'un conducteur y accède.",
-    bg: "from-amber-50 to-[#f5f5f2]",
-  },
-  {
-    icon: (
-      <div className="w-24 h-24 bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] rounded-[28px] flex items-center justify-center shadow-2xl shadow-blue-500/40 mx-auto">
-        <Navigation className="w-11 h-11 text-white" strokeWidth={2.2} />
-      </div>
-    ),
-    tag: "Tu cherches 🔍",
-    title: "Obtiens l'info,\nnavigue direct",
-    sub: "Vois les places disponibles autour de toi. Accède à l'info et l'app te guide automatiquement vers la place.",
-    bg: "from-blue-50 to-[#f5f5f2]",
-  },
-  {
-    icon: (
-      <div className="w-24 h-24 bg-gradient-to-br from-[#f5a623] to-[#e08e00] rounded-[28px] flex items-center justify-center shadow-2xl shadow-yellow-500/40 mx-auto">
-        <Zap className="w-11 h-11 text-white fill-white" strokeWidth={2.2} />
-      </div>
-    ),
-    tag: "SwiftCoins ⚡",
-    title: "5 coins offerts\npour démarrer",
-    sub: "Les SwiftCoins sont la monnaie de l'app. Sois récompensé en partageant — et dès 20 SC, retire-les en euros directement sur ton compte bancaire. 1 SC = 1€.",
-    bg: "from-yellow-50 to-[#f5f5f2]",
-  },
+const DM = "var(--font-dm-sans), system-ui, sans-serif";
+
+const STATS = [
+  { value: "30%",     label: "de la circulation urbaine", sub: "générée par la recherche de parking" },
+  { value: "20 min",  label: "perdues par trajet",         sub: "à tourner en rond en moyenne" },
+  { value: "1M t",    label: "de CO₂ inutiles / an",      sub: "rien qu'en France (source ADEME)" },
 ];
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [current, setCurrent] = useState(0);
 
-  function next() {
-    if (current < SLIDES.length - 1) {
-      setCurrent(current + 1);
-    } else {
-      localStorage.setItem("onboarding_done", "1");
-      router.push("/auth/register");
-    }
-  }
-
-  function skip() {
+  function handleStart() {
     localStorage.setItem("onboarding_done", "1");
     router.push("/auth/register");
   }
 
-  const slide = SLIDES[current];
-  const isLast = current === SLIDES.length - 1;
-
   return (
-    <div className={`min-h-screen bg-gradient-to-b ${slide.bg} flex flex-col transition-all duration-500`}>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: "#0a0a0a", fontFamily: DM }}
+    >
+      {/* Hero */}
+      <div className="flex-1 flex flex-col justify-center px-6 pt-16 pb-6">
 
-      {/* Skip */}
-      <div className="flex justify-end px-6 pt-14">
-        {!isLast && (
-          <button onClick={skip} className="text-sm font-semibold text-gray-400">
-            Passer
-          </button>
-        )}
-      </div>
-
-      {/* Contenu */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500" key={current}>
-          {slide.icon}
+        {/* Tag */}
+        <div className="inline-flex items-center gap-2 self-start bg-white/10 border border-white/15 rounded-full px-3 py-1.5 mb-8">
+          <span className="w-2 h-2 rounded-full bg-[#22956b] animate-pulse" />
+          <span className="text-white/70 text-xs font-semibold tracking-wide uppercase">La mission SwiftPark</span>
         </div>
 
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" key={`text-${current}`}>
-          <span className="inline-block bg-white/80 text-gray-500 text-xs font-bold px-3 py-1.5 rounded-full mb-4 border border-gray-100">
-            {slide.tag}
-          </span>
+        {/* Headline choc */}
+        <h1
+          className="text-white leading-tight mb-4"
+          style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.1 }}
+        >
+          À Paris, 1 voiture sur 3 en circulation{" "}
+          <span style={{ color: "#22956b" }}>cherche juste à se garer.</span>
+        </h1>
 
-          <h1 className="text-[32px] font-black text-gray-900 leading-tight mb-4 whitespace-pre-line">
-            {slide.title}
-          </h1>
+        <p className="text-white/50 text-sm leading-relaxed mb-10" style={{ fontWeight: 300 }}>
+          Du CO₂ inutile. Des bouchons évitables. Du stress quotidien. Et du temps perdu — chaque jour, par millions de conducteurs.
+        </p>
 
-          <p className="text-[15px] text-gray-500 leading-relaxed max-w-xs mx-auto">
-            {slide.sub}
+        {/* Stats */}
+        <div className="space-y-3 mb-10">
+          {STATS.map(({ value, label, sub }) => (
+            <div
+              key={value}
+              className="flex items-center gap-4 rounded-2xl px-4 py-3.5"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <span
+                className="shrink-0 font-black"
+                style={{ fontSize: 26, color: "#22956b", letterSpacing: "-0.04em", minWidth: 72 }}
+              >
+                {value}
+              </span>
+              <div>
+                <p className="text-white text-sm font-semibold leading-tight">{label}</p>
+                <p className="text-white/40 text-xs mt-0.5" style={{ fontWeight: 300 }}>{sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Solution */}
+        <div
+          className="rounded-2xl px-4 py-4 mb-8"
+          style={{ background: "linear-gradient(135deg, rgba(34,149,107,0.15) 0%, rgba(8,80,65,0.15) 100%)", border: "1px solid rgba(34,149,107,0.3)" }}
+        >
+          <p className="text-[#22956b] text-xs font-black uppercase tracking-widest mb-2">Notre réponse</p>
+          <p className="text-white text-sm leading-relaxed" style={{ fontWeight: 300 }}>
+            SwiftPark connecte les conducteurs qui{" "}
+            <span className="text-white font-semibold">signalent leur départ</span>{" "}
+            avec ceux qui{" "}
+            <span className="text-white font-semibold">cherchent une place</span>.
+            Moins de tours inutiles. Moins de CO₂. Une information récompensée.
           </p>
         </div>
       </div>
 
-      {/* Bas */}
-      <div className="px-6 pb-14 space-y-5">
-        {/* Dots */}
-        <div className="flex items-center justify-center gap-2">
-          {SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === current
-                  ? "w-6 h-2 bg-[#22956b]"
-                  : "w-2 h-2 bg-gray-200"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Bouton */}
+      {/* CTA */}
+      <div className="px-6 pb-14">
         <button
-          onClick={next}
-          className="w-full py-4 bg-gradient-to-r from-[#22956b] to-[#1a7a58] text-white font-black text-base rounded-2xl shadow-xl shadow-[#22956b]/30 flex items-center justify-center gap-2 active:scale-95 transition"
+          onClick={handleStart}
+          className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-base active:scale-95 transition"
+          style={{
+            background: "linear-gradient(135deg, #22956b 0%, #085041 100%)",
+            color: "#fff",
+            fontSize: 16,
+            boxShadow: "0 8px 32px rgba(34,149,107,0.4)",
+          }}
         >
-          {isLast ? "C'est parti ! 🚀" : "Suivant"}
-          {!isLast && <ArrowRight className="w-4 h-4" />}
+          Rejoindre le mouvement
+          <ArrowRight className="w-5 h-5" />
         </button>
+        <p className="text-center text-white/30 text-xs mt-3" style={{ fontWeight: 300 }}>
+          Gratuit · Aucun abonnement
+        </p>
       </div>
     </div>
   );

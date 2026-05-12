@@ -11,7 +11,7 @@ const APP_URL = "https://www.swiftpark.fr";
 
 export const metadata: Metadata = {
   title: "SwiftPark — Trouvez une place de parking en temps réel",
-  description: "Trouve une place de parking en secondes grâce aux conducteurs qui partagent leur place en temps réel. Gagne des SwiftCoins en partageant la tienne.",
+  description: "Trouve une place de parking en secondes grâce aux conducteurs qui signalent leur départ en temps réel. Gagne des SwiftCoins en partageant l'info.",
   metadataBase: new URL(APP_URL),
   manifest: "/manifest.json",
   icons: {
@@ -32,12 +32,12 @@ export const metadata: Metadata = {
     url: APP_URL,
     siteName: "SwiftPark",
     title: "SwiftPark — Trouvez une place de parking en temps réel",
-    description: "Trouve une place de parking en secondes grâce aux conducteurs qui partagent leur place en temps réel. Gagne des SwiftCoins en partageant la tienne.",
+    description: "Trouve une place de parking en secondes grâce aux conducteurs qui signalent leur départ en temps réel. Gagne des SwiftCoins en partageant l'info.",
   },
   twitter: {
     card: "summary_large_image",
     title: "SwiftPark — Trouvez une place de parking en temps réel",
-    description: "Trouve une place de parking en secondes. Gagne des SwiftCoins en partageant ta place.",
+    description: "Trouve une place de parking en secondes. Gagne des SwiftCoins en signalant ton départ.",
   },
 };
 
