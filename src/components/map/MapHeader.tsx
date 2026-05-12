@@ -1,9 +1,8 @@
 "use client";
 
-import { Locate, Moon, Sun, Lock, Layers } from "lucide-react";
+import { Locate, Lock, Layers } from "lucide-react";
 import { useMapStore } from "@/store/useMapStore";
 import Link from "next/link";
-import { useDarkMode } from "@/hooks/useDarkMode";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import FilterBar, { type MapFilters } from "@/components/map/FilterBar";
 import { toast } from "sonner";
@@ -35,9 +34,8 @@ export default function MapHeader({
   spotsCount, onLocate, onSearch, onShare, filters, onFiltersChange, hasActiveSpot,
 }: MapHeaderProps) {
   const profile        = useMapStore((s) => s.profile);
-  const isSatellite    = useMapStore((s) => s.isSatellite);
+  const isSatellite     = useMapStore((s) => s.isSatellite);
   const toggleSatellite = useMapStore((s) => s.toggleSatellite);
-  const { isDark, toggle } = useDarkMode();
 
   return (
     <div className="absolute top-0 left-0 right-0 z-[800] pointer-events-none" style={{ fontFamily: DM }}>
@@ -117,21 +115,6 @@ export default function MapHeader({
               }}
             >
               <Layers className="w-4 h-4" />
-            </button>
-            <button
-              onClick={toggle}
-              className="flex items-center justify-center"
-              style={{
-                width: 36, height: 36,
-                borderRadius: 12,
-                background: "#fff",
-                border: `1px solid ${T.divider}`,
-                color: T.ink,
-              }}
-            >
-              {isDark
-                ? <Sun className="w-4 h-4" style={{ color: "#f59e0b" }} />
-                : <Moon className="w-4 h-4" style={{ color: T.muted }} />}
             </button>
             <button
               onClick={onLocate}
