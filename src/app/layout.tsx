@@ -7,9 +7,12 @@ import "./globals.css";
 const inter   = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const dmSans  = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", weight: ["300", "400"] });
 
+const APP_URL = "https://www.swiftpark.fr";
+
 export const metadata: Metadata = {
-  title: "SwiftPark — Trouvez une place en temps réel",
-  description: "Partagez et trouvez des places de stationnement en temps réel grâce aux SwiftCoins.",
+  title: "SwiftPark — Trouvez une place de parking en temps réel",
+  description: "Trouve une place de parking en secondes grâce aux conducteurs qui partagent leur place en temps réel. Gagne des SwiftCoins en partageant la tienne.",
+  metadataBase: new URL(APP_URL),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -23,10 +26,23 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "SwiftPark",
   },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: APP_URL,
+    siteName: "SwiftPark",
+    title: "SwiftPark — Trouvez une place de parking en temps réel",
+    description: "Trouve une place de parking en secondes grâce aux conducteurs qui partagent leur place en temps réel. Gagne des SwiftCoins en partageant la tienne.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SwiftPark — Trouvez une place de parking en temps réel",
+    description: "Trouve une place de parking en secondes. Gagne des SwiftCoins en partageant ta place.",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1da45f",
+  themeColor: "#22956b",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

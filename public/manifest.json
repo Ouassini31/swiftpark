@@ -1,11 +1,11 @@
 {
   "name": "SwiftPark",
   "short_name": "SwiftPark",
-  "description": "Partagez et trouvez des places de stationnement en temps réel",
+  "description": "Trouve une place de parking en temps réel. Gagne des SwiftCoins en partageant la tienne.",
   "start_url": "/map",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1da45f",
+  "background_color": "#085041",
+  "theme_color": "#22956b",
   "orientation": "portrait",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
