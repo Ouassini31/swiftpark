@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Map, UserPlus, ClipboardList, Trophy, User, X, Copy, Check, History } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMapStore } from "@/store/useMapStore";
 
 const NAV = [
   { href: "/map",          label: "Carte",    icon: Map },
@@ -14,9 +15,10 @@ const NAV = [
   { href: "/profile",      label: "Profil",   icon: User },
 ];
 
-function InviteSheet({ onClose }: { onClose: () => void }) {
+function InviteSheet({ onClose, referralCode }: { onClose: () => void; referralCode?: string }) {
   const [copied, setCopied] = useState(false);
-  const link = "https://www.swiftpark.fr";
+  const base = "https://www.swiftpark.fr";
+  const link = referralCode ? `${base}/auth/register?ref=${referralCode}` : base;
 
   async function handleCopy() {
     await navigator.clipboard.writeText(link);
@@ -51,15 +53,30 @@ function InviteSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="text-sm text-gray-500 mb-5">
-          Partage SwiftPark à tes amis — plus on est nombreux, plus il y a de places disponibles !
+          Partage SwiftPark à tes amis — vous recevez chacun <span className="font-semibold text-[#22956b]">+5 SC</span> dès leur inscription !
         </p>
+        {referralCode && (
+          <div className="flex items-center justify-between bg-[#e8f5ef] rounded-2xl px-4 py-3 mb-3">
+            <div>
+              <p className="text-[10px] font-bold text-[#22956b] uppercase tracking-widest mb-0.5">Ton code perso</p>
+              <p className="text-lg font-black tracking-widest text-[#085041]">{referralCode}</p>
+            </div>
+            <button
+              onClick={() => { navigator.clipboard.writeText(referralCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+              className="flex items-center gap-1.5 text-xs font-bold text-[#22956b]"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied ? "Copié !" : "Copier"}
+            </button>
+          </div>
+        )}
 
         {/* Lien */}
         <div className="flex items-center gap-2 bg-gray-50 rounded-2xl px-4 py-3 mb-4 border border-gray-100">
-          <span className="flex-1 text-sm font-semibold text-gray-700 truncate">{link}</span>
+          <span className="flex-1 text-xs text-gray-500 truncate">{link}</span>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#22956b]"
+            className="flex items-center gap-1.5 text-xs font-bold text-[#22956b] shrink-0"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             {copied ? "Copié !" : "Copier"}
@@ -85,10 +102,12 @@ function InviteSheet({ onClose }: { onClose: () => void }) {
 export default function BottomNav() {
   const pathname = usePathname();
   const [showInvite, setShowInvite] = useState(false);
+  const profile = useMapStore((s) => s.profile);
+  const referralCode = (profile as Record<string, unknown>)?.referral_code as string | undefined;
 
   return (
     <>
-      {showInvite && <InviteSheet onClose={() => setShowInvite(false)} />}
+      {showInvite && <InviteSheet onClose={() => setShowInvite(false)} referralCode={referralCode} />}
 
       <nav className="fixed bottom-0 left-0 right-0 z-[850] safe-bottom">
         <div className="bg-white/90 backdrop-blur-xl border-t border-gray-100/80 shadow-[0_-8px_32px_rgba(0,0,0,.08)]">

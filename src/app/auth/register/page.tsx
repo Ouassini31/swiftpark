@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -19,8 +19,14 @@ function GoogleIcon() {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({ email: "", password: "", username: "", full_name: "", referral_code: "" });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setForm((prev) => ({ ...prev, referral_code: ref.toUpperCase() }));
+  }, [searchParams]);
 
   async function handleGoogle() {
     const supabase = createClient();
