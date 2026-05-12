@@ -15,7 +15,6 @@ function LoginForm() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading]   = useState(false);
-  const [refCode, setRefCode]   = useState("");
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -29,10 +28,9 @@ function LoginForm() {
 
   async function handleGoogle() {
     const supabase = createClient();
-    const ref = refCode.trim() ? `&ref=${refCode.trim().toUpperCase()}` : "";
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${redirectTo}${ref}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${redirectTo}` },
     });
     if (error) toast.error("Google : " + error.message);
   }
@@ -71,16 +69,6 @@ function LoginForm() {
           {loading ? "Connexion…" : "Se connecter"}
         </button>
       </form>
-
-      <div className="mt-3">
-        <input
-          type="text"
-          value={refCode}
-          onChange={(e) => setRefCode(e.target.value.toUpperCase())}
-          placeholder="Code de parrainage (optionnel)"
-          className="w-full border border-[var(--b,#e8e8e2)] rounded-[10px] px-3 py-2.5 text-sm text-[var(--t,#111)] bg-[var(--s2,#f8f8f5)] outline-none focus:border-[#22956b] tracking-widest text-center"
-        />
-      </div>
 
       <button
         onClick={handleGoogle}

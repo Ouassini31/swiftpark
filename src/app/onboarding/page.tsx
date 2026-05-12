@@ -63,13 +63,13 @@ export default function OnboardingPage() {
       setCurrent(current + 1);
     } else {
       localStorage.setItem("onboarding_done", "1");
-      router.push("/auth/login");
+      router.push("/auth/register");
     }
   }
 
   function skip() {
     localStorage.setItem("onboarding_done", "1");
-    router.push("/auth/login");
+    router.push("/auth/register");
   }
 
   const slide = SLIDES[current];
