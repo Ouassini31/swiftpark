@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Star, LogOut, Edit2, Check,
-  Zap, Trophy, ChevronRight, Loader2, FileText, Camera, History, ArrowLeftRight,
+  Zap, Trophy, ChevronRight, Loader2, FileText, Camera, History, ArrowLeftRight, Trash2, X,
 } from "lucide-react";
 import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -42,6 +42,8 @@ export default function ProfileClient({
   const [saving, setSaving]       = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? "");
   const [uploading, setUploading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -84,6 +86,22 @@ export default function ProfileClient({
     await supabase.auth.signOut();
     router.push("/onboarding");
     router.refresh();
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/account/delete", { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/onboarding");
+    } catch {
+      toast.error("Erreur lors de la suppression du compte");
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   }
 
   if (!profile) return null;
@@ -306,10 +324,64 @@ export default function ProfileClient({
           Se déconnecter
         </button>
 
+        {/* Supprimer le compte */}
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="w-full py-3 flex items-center justify-center gap-2 text-xs font-medium text-gray-400 active:text-red-400 transition"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          Supprimer mon compte
+        </button>
+
         {/* Email en bas, discret */}
         <p className="text-center text-[11px] text-gray-400 pb-2">{email}</p>
 
       </div>
+
+      {/* ── Modal confirmation suppression ── */}
+      {showDeleteConfirm && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[900]" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="fixed bottom-0 left-0 right-0 z-[910] bg-white rounded-t-3xl p-6 pb-10 shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-black text-gray-900">Supprimer mon compte</h2>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="bg-red-50 rounded-2xl p-4 mb-5">
+              <p className="text-sm font-semibold text-red-700 mb-1">⚠️ Action irréversible</p>
+              <p className="text-xs text-red-600 leading-relaxed">
+                Ton profil, tes SwiftCoins, ton historique et tes données personnelles seront définitivement supprimés.
+                Cette action ne peut pas être annulée.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="w-full py-4 bg-red-500 text-white font-bold rounded-2xl text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {deleting
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Trash2 className="w-4 h-4" />}
+                {deleting ? "Suppression…" : "Oui, supprimer définitivement"}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="w-full py-4 bg-gray-100 text-gray-700 font-semibold rounded-2xl text-sm"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
