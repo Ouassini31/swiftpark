@@ -20,10 +20,10 @@ export default function WithdrawalActions({
 
   async function update(newStatus: "completed" | "rejected") {
     setLoading(newStatus === "completed" ? "approve" : "reject");
-    const supabase = createClient();
-    const { error } = await (supabase as Parameters<typeof supabase.from>[0] extends never ? never : ReturnType<typeof supabase.from>["update"] extends never ? never : typeof supabase)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from("withdrawal_requests" as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = createClient() as any;
+    const { error } = await supabase
+      .from("withdrawal_requests")
       .update({ status: newStatus, processed_at: new Date().toISOString() })
       .eq("id", id);
 
