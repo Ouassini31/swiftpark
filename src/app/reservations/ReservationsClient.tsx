@@ -289,7 +289,7 @@ function HistoryCard({
 
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-        <span className="truncate">{reservation.parking_spots?.address ?? "Place partagée"}</span>
+        <span className="truncate">{reservation.parking_spots?.address ?? "Adresse non disponible"}</span>
       </div>
 
       <div className="flex items-center justify-between">

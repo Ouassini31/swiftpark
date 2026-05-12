@@ -165,8 +165,8 @@ export default function LeaderboardClient({
                     </>
                   )}
                   {tab === "sharers"
-                    ? `${user.spots_shared} places partagées`
-                    : `${user.spots_found} places trouvées`}
+                    ? `${user.spots_shared} départs signalés`
+                    : `${user.spots_found} infos obtenues`}
                 </p>
               </div>
               <div className="text-right shrink-0">

@@ -21,7 +21,7 @@ const SLIDES = [
     emoji: "⚡",
     bg: "bg-purple-50",
     title: "Le cycle parfait",
-    desc: "Tu trouves une place → tu la partages quand tu pars → tu reçois une récompense.",
+    desc: "Tu trouves une place → tu signales ton départ quand tu pars → tu reçois une récompense.",
     pushSlide: false,
   },
   {

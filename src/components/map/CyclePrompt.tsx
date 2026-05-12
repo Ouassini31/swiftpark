@@ -88,7 +88,7 @@ export default function CyclePrompt({
             color: T.muted, lineHeight: 1.5,
           }}>
             Quand vous quitterez {street}, prévenez la communauté pour qu'un
-            autre conducteur puisse se garer à votre place.
+            autre conducteur puisse récupérer l'emplacement.
           </p>
 
           {/* Récompense + countdown */}
@@ -148,7 +148,7 @@ export default function CyclePrompt({
               fontFamily: DM,
             }}
           >
-            Oui, je partage
+            Oui, je signale
           </button>
         </div>
       </div>

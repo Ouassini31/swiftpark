@@ -153,14 +153,14 @@ export default function TrackingPanel({
         p_user_id:        profile.id,
         p_amount:         reservation.sharer_receive,
         p_type:           "earn",
-        p_description:    `Gain place partagée · ${reservation.sharer_receive} SC`,
+        p_description:    `Départ signalé · ${reservation.sharer_receive} SC`,
         p_reservation_id: reservation.id,
       });
 
       notifyUser({
         user_id:        reservation.finder_id,
         type:           "spot_validated",
-        title:          "🏃 Le partageur part maintenant !",
+        title:          "🏃 Il part maintenant !",
         message:        "La place se libère ! Dépêche-toi d'arriver.",
         reservation_id: reservation.id,
         url:            "/map",
@@ -280,7 +280,7 @@ export default function TrackingPanel({
 
         {role === "finder" && (
           <div className="bg-[#22956b]/10 border border-[#22956b]/20 rounded-2xl px-4 py-3 text-sm text-[#22956b] font-medium text-center">
-            📡 Votre position est partagée en temps réel
+            📡 Votre position est transmise en temps réel
           </div>
         )}
 

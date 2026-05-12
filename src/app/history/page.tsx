@@ -19,7 +19,7 @@ export default async function HistoryPage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  // Places partagées (sharer)
+  // Départs signalés (sharer)
   const { data: shared } = await supabase
     .from("parking_spots")
     .select("id, address, lat, lng, coin_price, status, created_at, validated_at")

@@ -146,7 +146,7 @@ export default function GPSSuccess({
             </div>
             {isFirst && (
               <p style={{ ...label, color: T.muted, marginTop: 8, textAlign: "center" }}>
-                Partagez une place pour en gagner plus
+                Signalez votre départ pour en gagner plus
               </p>
             )}
           </div>

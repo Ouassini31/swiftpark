@@ -122,7 +122,7 @@ export default function GpsValidation({
           p_user_id:        reservation.sharer_id,
           p_amount:         reservation.sharer_receive,
           p_type:           "earn",
-          p_description:    `Gain place partagée — ${reservation.sharer_receive} SC`,
+          p_description:    `Départ signalé — ${reservation.sharer_receive} SC`,
           p_reservation_id: reservation.id,
         });
       }
@@ -169,8 +169,8 @@ export default function GpsValidation({
         <h3 className="text-lg font-black text-gray-900">Validation GPS</h3>
         <p className="text-sm text-gray-500 mt-1">
           {role === "sharer"
-            ? "Confirmez que vous êtes bien à la place pour finaliser"
-            : "Confirmez votre arrivée sur la place"}
+            ? "Confirmez que vous êtes bien sur place pour finaliser"
+            : "Confirmez votre arrivée sur place"}
         </p>
       </div>
 

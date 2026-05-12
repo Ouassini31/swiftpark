@@ -242,12 +242,12 @@ export default function SpotSheet() {
     <span style={{ color: T.ink }}>
       {sharerName ?? "Anonyme"}
       {sharerCount && sharerCount > 0
-        ? <span style={{ color: T.muted, fontWeight: 300 }}> · {sharerCount} partagée{sharerCount > 1 ? "s" : ""} ✓</span>
+        ? <span style={{ color: T.muted, fontWeight: 300 }}> · {sharerCount} signalement{sharerCount > 1 ? "s" : ""} ✓</span>
         : null}
     </span>
   )]);
 
-  rows.push(["Partagé", (
+  rows.push(["Signalé", (
     <span style={{ color: T.muted }}>{timeAgo}</span>
   )]);
 

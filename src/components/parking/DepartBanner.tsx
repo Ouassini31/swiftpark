@@ -119,7 +119,7 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
         p_user_id: profile.id,
         p_amount: reservation.sharer_receive,
         p_type: "earn",
-        p_description: `Gain place partagée · ${reservation.sharer_receive} SC`,
+        p_description: `Départ signalé · ${reservation.sharer_receive} SC`,
         p_reservation_id: reservation.id,
       });
 
@@ -127,7 +127,7 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
       notifyUser({
         user_id:        reservation.finder_id,
         type:           "spot_validated",
-        title:          "🏃 Le partageur part maintenant !",
+        title:          "🏃 Il part maintenant !",
         message:        `La place se libère ! Dépêche-toi d'arriver.`,
         reservation_id: reservation.id,
         url:            "/map",
@@ -138,7 +138,7 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
         user_id:        profile.id,
         type:           "payment_received",
         title:          `✅ +${reservation.sharer_receive} SC reçus !`,
-        message:        `Merci d'avoir partagé ta place. Tes SwiftCoins sont crédités.`,
+        message:        `Merci d'avoir signalé ton départ. Tes SwiftCoins sont crédités.`,
         reservation_id: reservation.id,
         url:            "/wallet",
       });
