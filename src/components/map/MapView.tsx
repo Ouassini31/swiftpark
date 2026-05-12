@@ -88,10 +88,11 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
       const isDark = document.documentElement.dataset.theme === "dark";
+      const isSat  = useMapStore.getState().isSatellite;
 
       const map = new mapboxgl.Map({
         container: mapContainer.current,
-        style: isDark ? STYLE_DARK : STYLE_LIGHT,
+        style: isSat ? STYLE_SAT : isDark ? STYLE_DARK : STYLE_LIGHT,
         center: [mapLng, mapLat],
         zoom: mapZoom,
         attributionControl: false,
