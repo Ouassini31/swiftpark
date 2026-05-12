@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -17,7 +17,7 @@ function GoogleIcon() {
   );
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [form, setForm] = useState({ email: "", password: "", username: "", full_name: "", referral_code: "" });
@@ -182,5 +182,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#22956b] border-t-transparent rounded-full animate-spin" /></div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
