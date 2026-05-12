@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Banknote, Clock, CheckCircle, XCircle } from "lucide-react";
+import WithdrawalActions from "./WithdrawalActions";
 
 type WithdrawalRequest = {
   id: string;
@@ -98,6 +99,7 @@ export default async function AdminWithdrawalsPage() {
                   <th className="px-5 py-3 text-left">Titulaire</th>
                   <th className="px-5 py-3 text-left">Date</th>
                   <th className="px-5 py-3 text-left">Statut</th>
+                  <th className="px-5 py-3 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -130,6 +132,13 @@ export default async function AdminWithdrawalsPage() {
                           {STATUS_LABELS[r.status]}
                         </span>
                       </td>
+                      <td className="px-5 py-3.5">
+                        {r.status === "pending" || r.status === "processing" ? (
+                          <WithdrawalActions id={r.id} status={r.status} iban={r.iban} />
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -140,7 +149,7 @@ export default async function AdminWithdrawalsPage() {
       </div>
 
       <p className="text-xs text-gray-400 text-center mt-4">
-        Pour valider un virement, effectue le virement SEPA manuellement puis mets à jour le statut dans Supabase.
+        Effectue le virement SEPA manuellement, puis clique sur "Virement fait" pour créditer le statut.
       </p>
     </div>
   );

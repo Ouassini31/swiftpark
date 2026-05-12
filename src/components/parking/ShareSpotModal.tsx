@@ -72,7 +72,7 @@ export default function ShareSpotModal({ onClose }: ShareSpotModalProps) {
       .update({ spots_shared: (profile.spots_shared ?? 0) + 1 })
       .eq("id", profile.id);
 
-    toast.success(`✓ Partagé ! Tu recevras ${netCoins(price)} SC à ton départ.`);
+    toast.success(`✓ Signalé ! Tu recevras ${netCoins(price)} SC à ton départ.`);
     setMode("idle");
     onClose();
   }

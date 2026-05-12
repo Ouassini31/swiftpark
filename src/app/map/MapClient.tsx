@@ -18,6 +18,7 @@ import { type MapFilters, DEFAULT_FILTERS } from "@/components/map/FilterBar";
 import Onboarding from "@/components/onboarding/Onboarding";
 import DepartBanner, { type DepartResult } from "@/components/parking/DepartBanner";
 import InstallBanner from "@/components/ui/InstallBanner";
+import NotifPromptBanner from "@/components/ui/NotifPromptBanner";
 import NavigationBanner from "@/components/map/NavigationBanner";
 import CyclePrompt from "@/components/map/CyclePrompt";
 import GPSSuccess from "@/components/map/GPSSuccess";
@@ -286,6 +287,7 @@ export default function MapClient() {
       {showShare  && <ShareSpotModal  onClose={() => setShowShare(false)} />}
 
       <InstallBanner />
+      {profile?.id && <NotifPromptBanner userId={profile.id} />}
       <BottomNav />
     </div>
   );
