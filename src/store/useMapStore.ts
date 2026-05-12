@@ -22,6 +22,9 @@ interface MapState {
   // Profil
   profile: Profile | null;
 
+  // Vue satellite
+  isSatellite: boolean;
+
   // Actions
   setUserLocation: (lat: number, lng: number) => void;
   setMapCenter: (lat: number, lng: number, zoom?: number) => void;
@@ -31,6 +34,7 @@ interface MapState {
   selectSpot: (spot: Spot | null) => void;
   setMode: (mode: MapState["mode"]) => void;
   setProfile: (profile: Profile | null) => void;
+  toggleSatellite: () => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -44,6 +48,7 @@ export const useMapStore = create<MapState>((set) => ({
   selectedSpot: null,
   mode: "idle",
   profile: null,
+  isSatellite: false,
 
   setUserLocation: (lat, lng) =>
     set({ userLat: lat, userLng: lng, mapLat: lat, mapLng: lng }),
@@ -69,4 +74,5 @@ export const useMapStore = create<MapState>((set) => ({
   selectSpot: (spot) => set({ selectedSpot: spot }),
   setMode: (mode) => set({ mode }),
   setProfile: (profile) => set({ profile }),
+  toggleSatellite: () => set((s) => ({ isSatellite: !s.isSatellite })),
 }));

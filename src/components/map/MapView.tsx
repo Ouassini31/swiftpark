@@ -58,9 +58,10 @@ function getCompatibilityOpacity(
   return 0.22;
 }
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
-const STYLE_LIGHT  = "mapbox://styles/mapbox/streets-v12";
-const STYLE_DARK   = "mapbox://styles/mapbox/dark-v11";
+const MAPBOX_TOKEN  = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+const STYLE_LIGHT   = "mapbox://styles/mapbox/streets-v12";
+const STYLE_DARK    = "mapbox://styles/mapbox/dark-v11";
+const STYLE_SAT     = "mapbox://styles/mapbox/satellite-streets-v12";
 
 export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -69,7 +70,7 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markersRef = useRef<Map<string, any>>(new Map());
 
-  const { mapLat, mapLng, mapZoom, userLat, userLng, spots, selectSpot, profile } = useMapStore();
+  const { mapLat, mapLng, mapZoom, userLat, userLng, spots, selectSpot, profile, isSatellite } = useMapStore();
 
   const visibleSpots = filteredSpots ?? spots;
 
@@ -101,9 +102,10 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
       const obs = new MutationObserver(() => {
         if (!mapRef.current) return;
         const dark = document.documentElement.dataset.theme === "dark";
-        mapRef.current.setStyle(dark ? STYLE_DARK : STYLE_LIGHT);
+        const sat  = document.documentElement.dataset.satellite === "true";
+        mapRef.current.setStyle(sat ? STYLE_SAT : dark ? STYLE_DARK : STYLE_LIGHT);
       });
-      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-satellite"] });
       map.on("remove", () => obs.disconnect());
     }
 
@@ -118,6 +120,11 @@ export default function MapView({ filteredSpots }: { filteredSpots?: Spot[] }) {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* ── Satellite toggle ── */
+  useEffect(() => {
+    document.documentElement.dataset.satellite = String(isSatellite);
+  }, [isSatellite]);
 
   /* ── Marqueur utilisateur (point bleu pulsé) ── */
   useEffect(() => {

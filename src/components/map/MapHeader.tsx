@@ -1,6 +1,6 @@
 "use client";
 
-import { Locate, Moon, Sun, Lock } from "lucide-react";
+import { Locate, Moon, Sun, Lock, Layers } from "lucide-react";
 import { useMapStore } from "@/store/useMapStore";
 import Link from "next/link";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -34,7 +34,9 @@ interface MapHeaderProps {
 export default function MapHeader({
   spotsCount, onLocate, onSearch, onShare, filters, onFiltersChange, hasActiveSpot,
 }: MapHeaderProps) {
-  const profile = useMapStore((s) => s.profile);
+  const profile        = useMapStore((s) => s.profile);
+  const isSatellite    = useMapStore((s) => s.isSatellite);
+  const toggleSatellite = useMapStore((s) => s.toggleSatellite);
   const { isDark, toggle } = useDarkMode();
 
   return (
@@ -102,6 +104,20 @@ export default function MapHeader({
               </Link>
             )}
             <NotificationCenter />
+            {/* Satellite toggle */}
+            <button
+              onClick={toggleSatellite}
+              className="flex items-center justify-center"
+              style={{
+                width: 36, height: 36,
+                borderRadius: 12,
+                background: isSatellite ? T.accent : "#fff",
+                border: `1px solid ${isSatellite ? T.accent : T.divider}`,
+                color: isSatellite ? "#fff" : T.muted,
+              }}
+            >
+              <Layers className="w-4 h-4" />
+            </button>
             <button
               onClick={toggle}
               className="flex items-center justify-center"
