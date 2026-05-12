@@ -48,7 +48,7 @@ export const useMapStore = create<MapState>((set) => ({
   selectedSpot: null,
   mode: "idle",
   profile: null,
-  isSatellite: false,
+  isSatellite: true,
 
   setUserLocation: (lat, lng) =>
     set({ userLat: lat, userLng: lng, mapLat: lat, mapLng: lng }),
