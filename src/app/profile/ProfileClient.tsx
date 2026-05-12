@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Star, MapPin, LogOut, Edit2, Check,
-  Zap, Trophy, TrendingUp, Wallet, ChevronRight, Loader2, FileText,
+  ArrowLeft, Star, LogOut, Edit2, Check,
+  Zap, Trophy, Wallet, ChevronRight, Loader2, FileText, Camera,
 } from "lucide-react";
 import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -13,6 +13,8 @@ import type { Database } from "@/types/database";
 import VehicleSelector from "@/components/profile/VehicleSelector";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+const DM = "var(--font-dm-sans), system-ui, sans-serif";
 
 interface Badge { emoji: string; label: string; unlocked: boolean; }
 
@@ -54,7 +56,7 @@ export default function ProfileClient({
         .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = `${data.publicUrl}?t=${Date.now()}`; // cache bust
+      const url = `${data.publicUrl}?t=${Date.now()}`;
       await supabase.from("profiles").update({ avatar_url: url }).eq("id", profile.id);
       setAvatarUrl(url);
       toast.success("Photo mise à jour ✅");
@@ -72,7 +74,6 @@ export default function ProfileClient({
       .from("profiles")
       .update({ full_name: fullName })
       .eq("id", profile.id);
-
     if (error) toast.error("Erreur lors de la sauvegarde");
     else { toast.success("Profil mis à jour ✅"); setEditing(false); }
     setSaving(false);
@@ -87,297 +88,226 @@ export default function ProfileClient({
 
   if (!profile) return null;
 
-  const rating  = profile.rating ?? 0;
-  const nameParts = (profile.full_name || profile.username).trim().split(/\s+/);
-  const initials  = nameParts.length >= 2
+  const rating     = profile.rating ?? 0;
+  const nameParts  = (profile.full_name || profile.username).trim().split(/\s+/);
+  const initials   = nameParts.length >= 2
     ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
     : nameParts[0].slice(0, 2).toUpperCase();
-  const badges  = getBadges(profile);
-  const unlockedCount = badges.filter(b => b.unlocked).length;
+  const badges         = getBadges(profile);
+  const unlockedCount  = badges.filter(b => b.unlocked).length;
+  const referralCode   = (profile as { referral_code?: string }).referral_code;
+  const p              = profile as Record<string, unknown>;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f2] pb-28">
+    <div className="min-h-screen pb-28" style={{ background: "#f5f5f2", fontFamily: DM }}>
 
-      {/* ── Bandeau hero ────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#22956b] to-[#1a7a58] pt-12 pb-5 px-5 relative overflow-hidden">
-        {/* Cercle décoratif discret */}
-        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full" />
+      {/* ── Photo de voiture — pleine largeur ── */}
+      <div className="relative w-full" style={{ height: 260 }}>
 
-        <div className="relative flex items-center justify-between mb-4">
-          <Link href="/map"
-            className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <button
-            onClick={editing ? handleSave : () => setEditing(true)}
-            disabled={saving}
-            className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white"
-          >
-            {saving
-              ? <Loader2 className="w-4 h-4 animate-spin" />
-              : editing
-                ? <Check className="w-4 h-4" />
-                : <Edit2 className="w-4 h-4" />
-            }
-          </button>
-        </div>
+        {/* Image ou placeholder */}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="Ma voiture" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-3"
+            style={{ background: "linear-gradient(135deg, #085041 0%, #22956b 100%)" }}>
+            <div className="w-16 h-16 rounded-full bg-white/15 flex items-center justify-center">
+              <Camera className="w-7 h-7 text-white/70" />
+            </div>
+            <p className="text-white/60 text-sm">Ajoute la photo de ta voiture</p>
+          </div>
+        )}
 
-        {/* Avatar + infos — compacte */}
-        <div className="flex items-center gap-3">
-          {/* Photo voiture cliquable */}
-          <label className="relative shrink-0 cursor-pointer" title="Ajouter la photo de ta voiture">
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-            <div className="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center overflow-hidden">
-              {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="Photo de ta voiture" className="w-full h-full object-cover" />
+        {/* Gradient overlay bas */}
+        <div className="absolute inset-x-0 bottom-0 h-32"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)" }} />
+
+        {/* Bouton retour */}
+        <Link href="/map"
+          className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md"
+          style={{ background: "rgba(0,0,0,0.35)" }}
+        >
+          <ArrowLeft className="w-4 h-4 text-white" />
+        </Link>
+
+        {/* Bouton upload photo */}
+        <label className="absolute top-12 right-4 cursor-pointer">
+          <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+          <div className="w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md"
+            style={{ background: "rgba(0,0,0,0.35)" }}>
+            {uploading
+              ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+              : <Camera className="w-4 h-4 text-white" />}
+          </div>
+        </label>
+
+        {/* Nom + username + étoiles en bas de la photo */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              {editing ? (
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                  autoFocus
+                  className="text-xl font-black bg-white/20 backdrop-blur-md text-white rounded-xl px-3 py-1.5 w-full border border-white/30"
+                  style={{ fontFamily: DM }}
+                />
               ) : (
-                <span className="text-xl font-black text-white">{initials}</span>
+                <h1 className="text-xl font-black text-white leading-tight truncate"
+                  style={{ letterSpacing: "-0.02em" }}>
+                  {profile.full_name || profile.username}
+                </h1>
+              )}
+              <p className="text-white/60 text-xs mt-0.5">@{profile.username}</p>
+              {profile.rating_count > 0 && (
+                <div className="flex items-center gap-1 mt-1">
+                  {[1,2,3,4,5].map((i) => (
+                    <Star key={i} className={`w-3 h-3 ${i <= Math.round(rating) ? "fill-[#f5a623] text-[#f5a623]" : "text-white/30"}`} />
+                  ))}
+                  <span className="text-white/60 text-[10px] ml-0.5">{rating.toFixed(1)} · {profile.rating_count} avis</span>
+                </div>
               )}
             </div>
-            {/* Indicateur d'upload */}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-              {uploading
-                ? <Loader2 className="w-3 h-3 text-[#22956b] animate-spin" />
-                : <Edit2 className="w-2.5 h-2.5 text-[#22956b]" />
-              }
-            </div>
-          </label>
-          <div className="flex-1 min-w-0">
-            {editing ? (
-              <input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                autoFocus
-                className="text-base font-black text-[#22956b] bg-white rounded-xl px-3 py-1.5 w-full"
-              />
-            ) : (
-              <h2 className="text-base font-black text-white leading-tight">
-                {profile.full_name || profile.username}
-              </h2>
-            )}
-            <p className="text-white/60 text-xs">@{profile.username}</p>
-            {profile.rating_count > 0 ? (
-              <div className="flex items-center gap-1 mt-0.5">
-                {[1,2,3,4,5].map((i) => (
-                  <Star key={i} className={`w-3 h-3 ${i <= Math.round(rating) ? "fill-[#f5a623] text-[#f5a623]" : "text-white/30"}`} />
-                ))}
-                <span className="text-white/60 text-[10px] ml-0.5">{rating.toFixed(1)} · {profile.rating_count} avis</span>
+            {/* Bouton édition nom */}
+            <button
+              onClick={editing ? handleSave : () => setEditing(true)}
+              disabled={saving}
+              className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md"
+              style={{ background: editing ? "#22956b" : "rgba(0,0,0,0.35)" }}
+            >
+              {saving
+                ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+                : editing
+                  ? <Check className="w-4 h-4 text-white" />
+                  : <Edit2 className="w-4 h-4 text-white" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-3 divide-x divide-gray-100 bg-white mx-4 mt-4 rounded-2xl shadow-sm overflow-hidden">
+        {[
+          { value: profile.coin_balance, label: "SwiftCoins", color: "#f5a623" },
+          { value: profile.spots_shared, label: "Partagées",  color: "#22956b" },
+          { value: profile.spots_found,  label: "Trouvées",   color: "#7c3aed" },
+        ].map(({ value, label, color }) => (
+          <div key={label} className="flex flex-col items-center py-4 px-2">
+            <span className="text-2xl font-black" style={{ color, letterSpacing: "-0.03em" }}>{value}</span>
+            <span className="text-[11px] text-gray-400 mt-0.5">{label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="px-4 space-y-3 mt-4">
+
+        {/* ── Badges ── */}
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-4 pt-4 pb-3">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Badges</span>
+            <span className="text-xs font-semibold" style={{ color: "#22956b" }}>{unlockedCount}/{badges.length}</span>
+          </div>
+          <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-none">
+            {badges.map((b) => (
+              <div key={b.label}
+                className="shrink-0 flex flex-col items-center gap-1 px-3 py-3 rounded-2xl"
+                style={{
+                  background: b.unlocked ? "#e8f5ef" : "#f5f5f2",
+                  opacity: b.unlocked ? 1 : 0.5,
+                  minWidth: 72,
+                }}>
+                <span className="text-2xl">{b.emoji}</span>
+                <p className="text-[10px] text-center font-semibold text-gray-700 leading-tight whitespace-nowrap">
+                  {b.label}
+                </p>
+                {b.unlocked && (
+                  <span className="text-[9px] font-bold" style={{ color: "#22956b" }}>Débloqué</span>
+                )}
               </div>
-            ) : (
-              <p className="text-white/40 text-[10px] mt-0.5">Pas encore évalué</p>
-            )}
+            ))}
           </div>
         </div>
 
-        {/* Hint photo voiture */}
-        {!avatarUrl && (
-          <p className="text-white/50 text-[10px] mt-2.5 text-center">
-            📷 Appuie sur l&apos;icône pour ajouter la photo de ta voiture
-          </p>
-        )}
-      </div>
-
-      {/* ── Stats rapides ────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3 px-4 mt-3">
-        <StatCard
-          icon={<Zap className="w-5 h-5 text-[#f5a623] fill-[#f5a623]" />}
-          label="SwiftCoins"
-          value={String(profile.coin_balance)}
-          bg="bg-white"
-        />
-        <StatCard
-          icon={<MapPin className="w-5 h-5 text-[#22956b]" />}
-          label="Partagées"
-          value={String(profile.spots_shared)}
-          bg="bg-white"
-        />
-        <StatCard
-          icon={<TrendingUp className="w-5 h-5 text-violet-500" />}
-          label="Trouvées"
-          value={String(profile.spots_found)}
-          bg="bg-white"
-        />
-      </div>
-
-      <div className="px-4 space-y-4 mt-5">
-
-        {/* ── Badges ───────────────────────────────────────────── */}
-        <section>
-          <div className="flex items-center justify-between mb-2.5">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Badges</h3>
-            <span className="text-xs text-gray-400">{unlockedCount}/{badges.length}</span>
-          </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <div className="grid grid-cols-3 gap-3">
-              {badges.map((b) => (
-                <div key={b.label}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-xl transition ${
-                    b.unlocked ? "bg-[#e8f5ef]" : "bg-gray-50 opacity-40"
-                  }`}
-                >
-                  <span className="text-2xl">{b.emoji}</span>
-                  <p className="text-[10px] text-center font-semibold text-gray-700 leading-tight">
-                    {b.label}
-                  </p>
-                  {b.unlocked && (
-                    <span className="text-[9px] text-[#22956b] font-bold">Débloqué</span>
-                  )}
-                </div>
-              ))}
+        {/* ── Parrainage ── */}
+        {referralCode && (
+          <div className="bg-white rounded-2xl shadow-sm px-4 py-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Parrainage</span>
+              <span className="text-xs text-gray-400">+5 SC chacun</span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-2xl font-black tracking-widest" style={{ color: "#1a1a16", letterSpacing: "0.12em" }}>
+                {referralCode}
+              </span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(referralCode ?? "");
+                  toast.success("Code copié !");
+                }}
+                className="px-4 py-2 rounded-xl text-sm font-bold"
+                style={{ background: "#e8f5ef", color: "#22956b" }}
+              >
+                Copier
+              </button>
             </div>
           </div>
-        </section>
-
-        {/* ── Code de parrainage ───────────────────────────────── */}
-        {(profile as { referral_code?: string }).referral_code && (
-          <section className="bg-white rounded-2xl px-4 py-3 shadow-sm flex items-center gap-3">
-            <span className="text-xl">🎁</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] text-gray-400">Code parrainage · +5 SC chacun</p>
-              <p className="text-sm font-black text-gray-900 tracking-widest">
-                {(profile as { referral_code?: string }).referral_code}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText((profile as { referral_code?: string }).referral_code ?? "");
-                toast.success("Code copié !");
-              }}
-              className="shrink-0 bg-[#e8f5ef] text-[#22956b] text-xs font-bold px-3 py-1.5 rounded-xl"
-            >
-              Copier
-            </button>
-          </section>
         )}
 
-        {/* ── Véhicule ─────────────────────────────────────────── */}
+        {/* ── Véhicule ── */}
         <VehicleSelector
           userId={userId}
           initial={{
-            make:      (profile as Record<string, unknown>).vehicle_make as string ?? "",
-            model:     (profile as Record<string, unknown>).vehicle_model as string ?? "",
-            year:      (profile as Record<string, unknown>).vehicle_year as number | null ?? null,
-            color:     (profile as Record<string, unknown>).vehicle_color as string ?? "",
-            length_cm: (profile as Record<string, unknown>).vehicle_length_cm as number | null ?? null,
-            category:  (profile as Record<string, unknown>).vehicle_category as string | null ?? null,
-            plate:     (profile as Record<string, unknown>).vehicle_plate as string ?? "",
+            make:      p.vehicle_make as string ?? "",
+            model:     p.vehicle_model as string ?? "",
+            year:      p.vehicle_year as number | null ?? null,
+            color:     p.vehicle_color as string ?? "",
+            length_cm: p.vehicle_length_cm as number | null ?? null,
+            category:  p.vehicle_category as string | null ?? null,
+            plate:     p.vehicle_plate as string ?? "",
           }}
         />
 
-        {/* ── Liens rapides ────────────────────────────────────── */}
-        <section className="space-y-2">
-          <QuickLink
-            href="/wallet"
-            icon={<Wallet className="w-5 h-5 text-[#22956b]" />}
-            label="Wallet SwiftCoins"
-            sub={`${profile.coin_balance} SC disponibles`}
-            bg="bg-[#e8f5ef]"
-          />
-          <QuickLink
-            href="/leaderboard"
-            icon={<Trophy className="w-5 h-5 text-yellow-500" />}
-            label="Classement"
-            sub="Voir ton rang"
-            bg="bg-yellow-50"
-          />
-          <QuickLink
-            href="/how-it-works"
-            icon={<span className="text-xl">💡</span>}
-            label="Comment ça marche"
-            sub="Guide & questions fréquentes"
-            bg="bg-blue-50"
-          />
-          <QuickLink
-            href="/legal"
-            icon={<FileText className="w-5 h-5 text-gray-500" />}
-            label="Mentions légales & CGU"
-            sub="Politique de confidentialité"
-            bg="bg-gray-100"
-          />
-        </section>
+        {/* ── Menu ── */}
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {[
+            { href: "/wallet",    icon: <Zap className="w-4 h-4" />,      label: "Wallet SwiftCoins", sub: `${profile.coin_balance} SC disponibles`, color: "#f5a623" },
+            { href: "/leaderboard", icon: <Trophy className="w-4 h-4" />, label: "Classement",         sub: "Voir ton rang",                         color: "#f5a623" },
+            { href: "/how-it-works",icon: <span className="text-sm">💡</span>, label: "Comment ça marche", sub: "Guide & FAQ",                       color: "#3b82f6" },
+            { href: "/legal",     icon: <FileText className="w-4 h-4" />, label: "CGU & Confidentialité", sub: "Mentions légales",                   color: "#94a3b8" },
+          ].map(({ href, icon, label, sub, color }, i, arr) => (
+            <Link key={href} href={href}
+              className="flex items-center gap-3.5 px-4 py-4 active:bg-gray-50 transition"
+              style={{ borderBottom: i < arr.length - 1 ? "1px solid #f5f5f2" : "none" }}
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: `${color}18`, color }}>
+                {icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900">{label}</p>
+                <p className="text-xs text-gray-400">{sub}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
+            </Link>
+          ))}
+        </div>
 
-        {/* ── Résumé financier ─────────────────────────────────── */}
-        <section>
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 px-1">
-            Résumé financier
-          </h3>
-          <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-            <FinRow label="SC gagnés (total)" value={`+${profile.coins_earned} SC`} positive />
-            <FinRow label="SC dépensés (total)" value={`-${profile.coins_spent} SC`} />
-            <div className="border-t border-gray-100 pt-3">
-              <FinRow
-                label="Solde net"
-                value={`${profile.coin_balance} SC`}
-                bold
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Déconnexion ──────────────────────────────────────── */}
+        {/* ── Déconnexion ── */}
         <button
           onClick={handleLogout}
-          className="w-full py-4 flex items-center justify-center gap-2 text-red-500 bg-white
-            rounded-2xl shadow-sm font-semibold active:scale-95 transition"
+          className="w-full py-4 flex items-center justify-center gap-2 rounded-2xl font-semibold text-sm active:scale-95 transition"
+          style={{ background: "#fff2f2", color: "#ef4444" }}
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-4 h-4" />
           Se déconnecter
         </button>
+
+        {/* Email en bas, discret */}
+        <p className="text-center text-[11px] text-gray-400 pb-2">{email}</p>
+
       </div>
-    </div>
-  );
-}
-
-/* ── Sous-composants ─────────────────────────────────────────────────── */
-
-function StatCard({ icon, label, value, bg }: {
-  icon: React.ReactNode; label: string; value: string; bg: string;
-}) {
-  return (
-    <div className={`${bg} rounded-2xl p-3.5 shadow-sm text-center`}>
-      <div className="flex justify-center mb-1.5">{icon}</div>
-      <p className="text-lg font-black text-gray-900">{value}</p>
-      <p className="text-[11px] text-gray-400">{label}</p>
-    </div>
-  );
-}
-
-function QuickLink({ href, icon, label, sub, bg }: {
-  href: string; icon: React.ReactNode; label: string; sub: string; bg: string;
-}) {
-  return (
-    <Link href={href}
-      className="flex items-center gap-3.5 bg-white rounded-2xl px-4 py-3.5 shadow-sm"
-    >
-      <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center shrink-0`}>
-        {icon}
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-bold text-gray-900">{label}</p>
-        <p className="text-xs text-gray-400">{sub}</p>
-      </div>
-      <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
-    </Link>
-  );
-}
-
-function FinRow({ label, value, positive, bold }: {
-  label: string; value: string; positive?: boolean; bold?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <p className={`text-sm ${bold ? "font-bold text-gray-900" : "text-gray-500"}`}>{label}</p>
-      <p className={`text-sm font-black ${positive ? "text-[#22956b]" : bold ? "text-gray-900" : "text-red-500"}`}>
-        {value}
-      </p>
     </div>
   );
 }
