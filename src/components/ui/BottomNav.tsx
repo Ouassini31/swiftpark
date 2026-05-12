@@ -104,6 +104,7 @@ export default function BottomNav() {
   const [showInvite, setShowInvite] = useState(false);
   const profile = useMapStore((s) => s.profile);
   const referralCode = (profile as Record<string, unknown>)?.referral_code as string | undefined;
+  const activeReservationCount = useMapStore((s) => s.activeReservationCount);
 
   return (
     <>
@@ -133,6 +134,8 @@ export default function BottomNav() {
                 );
               }
 
+              const showBadge = item.href === "/reservations" && activeReservationCount > 0;
+
               return (
                 <Link
                   key={item.href}
@@ -140,13 +143,16 @@ export default function BottomNav() {
                   className="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition"
                 >
                   <div className={cn(
-                    "w-10 h-8 flex items-center justify-center rounded-xl transition-all duration-200",
+                    "relative w-10 h-8 flex items-center justify-center rounded-xl transition-all duration-200",
                     isActive ? "bg-[#e8f5ef]" : "bg-transparent"
                   )}>
                     <Icon className={cn(
                       "w-5 h-5 transition-colors",
                       isActive ? "text-[#22956b]" : "text-gray-400"
                     )} />
+                    {showBadge && (
+                      <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+                    )}
                   </div>
                   <span className={cn(
                     "text-[10px] font-semibold transition-colors",

@@ -25,6 +25,9 @@ interface MapState {
   // Vue satellite
   isSatellite: boolean;
 
+  // Réservation active (badge nav)
+  activeReservationCount: number;
+
   // Actions
   setUserLocation: (lat: number, lng: number) => void;
   setMapCenter: (lat: number, lng: number, zoom?: number) => void;
@@ -35,6 +38,7 @@ interface MapState {
   setMode: (mode: MapState["mode"]) => void;
   setProfile: (profile: Profile | null) => void;
   toggleSatellite: () => void;
+  setActiveReservationCount: (n: number) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -49,6 +53,7 @@ export const useMapStore = create<MapState>((set) => ({
   mode: "idle",
   profile: null,
   isSatellite: true,
+  activeReservationCount: 0,
 
   setUserLocation: (lat, lng) =>
     set({ userLat: lat, userLng: lng, mapLat: lat, mapLng: lng }),
@@ -75,4 +80,5 @@ export const useMapStore = create<MapState>((set) => ({
   setMode: (mode) => set({ mode }),
   setProfile: (profile) => set({ profile }),
   toggleSatellite: () => set((s) => ({ isSatellite: !s.isSatellite })),
+  setActiveReservationCount: (n) => set({ activeReservationCount: n }),
 }));

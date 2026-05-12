@@ -29,12 +29,18 @@ export interface CompletedReservation {
 
 export function useActiveReservation() {
   const profile = useMapStore((s) => s.profile);
+  const setActiveReservationCount = useMapStore((s) => s.setActiveReservationCount);
   const [reservation, setReservation]             = useState<ActiveReservation | null>(null);
   const [completedReservation, setCompletedRes]   = useState<CompletedReservation | null>(null);
 
   // Ref so the realtime callback can access the latest reservation without stale closure
   const reservationRef = useRef<ActiveReservation | null>(null);
   useEffect(() => { reservationRef.current = reservation; }, [reservation]);
+
+  // Sync badge count
+  useEffect(() => {
+    setActiveReservationCount(reservation ? 1 : 0);
+  }, [reservation, setActiveReservationCount]);
 
   useEffect(() => {
     if (!profile) return;
