@@ -3,16 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, UserPlus, ClipboardList, Trophy, User, X, Copy, Check, History } from "lucide-react";
+import { Map, UserPlus, Trophy, User, X, Copy, Check, ArrowLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMapStore } from "@/store/useMapStore";
 
 const NAV = [
-  { href: "/map",          label: "Carte",    icon: Map },
-  { href: "/history",      label: "Trajets",  icon: History },
-  { href: "#invite",       label: "Inviter",  icon: UserPlus, primary: true },
-  { href: "/leaderboard",  label: "Top",      icon: Trophy },
-  { href: "/profile",      label: "Profil",   icon: User },
+  { href: "/map",           label: "Carte",    icon: Map },
+  { href: "/reservations",  label: "Échanges", icon: ArrowLeftRight },
+  { href: "#invite",        label: "Inviter",  icon: UserPlus, primary: true },
+  { href: "/leaderboard",   label: "Top",      icon: Trophy },
+  { href: "/profile",       label: "Profil",   icon: User },
 ];
 
 function InviteSheet({ onClose, referralCode }: { onClose: () => void; referralCode?: string }) {

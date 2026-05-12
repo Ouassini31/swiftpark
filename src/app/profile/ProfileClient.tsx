@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Star, LogOut, Edit2, Check,
-  Zap, Trophy, Wallet, ChevronRight, Loader2, FileText, Camera,
+  Zap, Trophy, ChevronRight, Loader2, FileText, Camera, History, ArrowLeftRight,
 } from "lucide-react";
 import Link from "next/link";
 import { createClientAny as createClient } from "@/lib/supabase/client";
@@ -272,10 +272,12 @@ export default function ProfileClient({
         {/* ── Menu ── */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {[
-            { href: "/wallet",    icon: <Zap className="w-4 h-4" />,      label: "Wallet SwiftCoins", sub: `${profile.coin_balance} SC disponibles`, color: "#f5a623" },
-            { href: "/leaderboard", icon: <Trophy className="w-4 h-4" />, label: "Classement",         sub: "Voir ton rang",                         color: "#f5a623" },
-            { href: "/how-it-works",icon: <span className="text-sm">💡</span>, label: "Comment ça marche", sub: "Guide & FAQ",                       color: "#3b82f6" },
-            { href: "/legal",     icon: <FileText className="w-4 h-4" />, label: "CGU & Confidentialité", sub: "Mentions légales",                   color: "#94a3b8" },
+            { href: "/wallet",       icon: <Zap className="w-4 h-4" />,             label: "Wallet SwiftCoins",    sub: `${profile.coin_balance} SC disponibles`, color: "#f5a623" },
+            { href: "/reservations", icon: <ArrowLeftRight className="w-4 h-4" />,  label: "Mes échanges",         sub: "Places trouvées & partagées",            color: "#22956b" },
+            { href: "/history",      icon: <History className="w-4 h-4" />,         label: "Historique",           sub: "Timeline de tes déplacements",           color: "#3b82f6" },
+            { href: "/leaderboard",  icon: <Trophy className="w-4 h-4" />,          label: "Classement",           sub: "Voir ton rang",                          color: "#f5a623" },
+            { href: "/how-it-works", icon: <span className="text-sm">💡</span>,     label: "Comment ça marche",    sub: "Guide & FAQ",                            color: "#3b82f6" },
+            { href: "/legal",        icon: <FileText className="w-4 h-4" />,        label: "CGU & Confidentialité",sub: "Mentions légales",                       color: "#94a3b8" },
           ].map(({ href, icon, label, sub, color }, i, arr) => (
             <Link key={href} href={href}
               className="flex items-center gap-3.5 px-4 py-4 active:bg-gray-50 transition"
