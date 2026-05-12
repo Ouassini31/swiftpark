@@ -30,7 +30,7 @@ const STEPS_FINDER = [
   {
     num: "1",
     title: "Tu cherches une place",
-    desc: "Ouvre SwiftPark, la carte affiche en temps réel les places partagées autour de toi.",
+    desc: "Ouvre SwiftPark, la carte affiche en temps réel les infos de départ signalées autour de toi.",
     icon: "🗺️",
   },
   {
@@ -50,7 +50,7 @@ const STEPS_FINDER = [
 const FAQS = [
   {
     q: "C'est quoi les SwiftCoins ?",
-    a: "Les SwiftCoins sont la monnaie de SwiftPark. 1 SwiftCoin = 1€. Tu en gagnes en partageant des places et tu les utilises pour accéder aux infos des autres conducteurs.",
+    a: "Les SwiftCoins sont la monnaie de SwiftPark. 1 SwiftCoin = 1€. Tu en gagnes en signalant tes départs et tu les utilises pour accéder aux infos des autres conducteurs.",
   },
   {
     q: "Est-ce que je garantis une place ?",

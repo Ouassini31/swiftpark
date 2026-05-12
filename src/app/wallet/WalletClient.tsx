@@ -192,7 +192,7 @@ export default function WalletClient({
         )}
         {realBalance === 0 && balance > 0 && (
           <p className="mt-4 text-center text-white/50 text-xs">
-            Partage des places pour gagner des SC retirables 🚗
+            Signale tes départs pour gagner des SC retirables 🚗
           </p>
         )}
       </div>
@@ -207,7 +207,7 @@ export default function WalletClient({
           <div>
             <p className="text-white font-black text-sm">1 SC réel = 1€ de cashback</p>
             <p className="text-white/70 text-xs mt-0.5">
-              SC gagnés en partageant → retirables dès 20 SC. Bonus inscription/parrainage → à dépenser sur SwiftPark.
+              SC gagnés en signalant → retirables dès 20 SC. Bonus inscription/parrainage → à dépenser sur SwiftPark.
             </p>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function WalletClient({
               <Zap className="w-10 h-10 mx-auto mb-3 opacity-20" />
               <p className="text-sm">Aucune transaction pour l'instant</p>
               <p className="text-xs mt-1 text-gray-400">
-                Partagez ou trouvez une place pour commencer !
+                Signale ton départ ou trouve une info pour commencer !
               </p>
             </div>
           ) : (

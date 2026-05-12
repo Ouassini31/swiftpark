@@ -167,7 +167,7 @@ export default function HistoryClient({ found, shared, profile }: Props) {
                 fontSize: 13,
               }}
             >
-              {t === "found" ? `🔍 Trouvées (${found.length})` : `🅿️ Partagées (${shared.length})`}
+              {t === "found" ? `🔍 Trouvées (${found.length})` : `🅿️ Signalées (${shared.length})`}
             </button>
           ))}
         </div>

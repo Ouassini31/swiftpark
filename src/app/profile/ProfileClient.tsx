@@ -20,9 +20,9 @@ interface Badge { emoji: string; label: string; unlocked: boolean; }
 
 function getBadges(profile: Profile): Badge[] {
   return [
-    { emoji: "🏆", label: "1ère place",    unlocked: profile.spots_shared >= 1 },
-    { emoji: "⚡", label: "10 partagées",  unlocked: profile.spots_shared >= 10 },
-    { emoji: "🔥", label: "50 partagées",  unlocked: profile.spots_shared >= 50 },
+    { emoji: "🏆", label: "1er signal",     unlocked: profile.spots_shared >= 1 },
+    { emoji: "⚡", label: "10 signalées",  unlocked: profile.spots_shared >= 10 },
+    { emoji: "🔥", label: "50 signalées",  unlocked: profile.spots_shared >= 50 },
     { emoji: "🌟", label: "Note 4.5+",     unlocked: (profile.rating ?? 0) >= 4.5 && profile.rating_count >= 5 },
     { emoji: "🎯", label: "10 trouvées",   unlocked: profile.spots_found >= 10 },
     { emoji: "💎", label: "100 SC gagnés", unlocked: profile.coins_earned >= 100 },
@@ -209,7 +209,7 @@ export default function ProfileClient({
       <div className="grid grid-cols-3 divide-x divide-gray-100 bg-white mx-4 mt-4 rounded-2xl shadow-sm overflow-hidden">
         {[
           { value: profile.coin_balance, label: "SwiftCoins", color: "#f5a623" },
-          { value: profile.spots_shared, label: "Partagées",  color: "#22956b" },
+          { value: profile.spots_shared, label: "Signalées",  color: "#22956b" },
           { value: profile.spots_found,  label: "Trouvées",   color: "#7c3aed" },
         ].map(({ value, label, color }) => (
           <div key={label} className="flex flex-col items-center py-4 px-2">
@@ -291,7 +291,7 @@ export default function ProfileClient({
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {[
             { href: "/wallet",       icon: <Zap className="w-4 h-4" />,             label: "Wallet SwiftCoins",    sub: `${profile.coin_balance} SC disponibles`, color: "#f5a623" },
-            { href: "/reservations", icon: <ArrowLeftRight className="w-4 h-4" />,  label: "Mes échanges",         sub: "Places trouvées & partagées",            color: "#22956b" },
+            { href: "/reservations", icon: <ArrowLeftRight className="w-4 h-4" />,  label: "Mes échanges",         sub: "Infos trouvées & départs signalés",      color: "#22956b" },
             { href: "/history",      icon: <History className="w-4 h-4" />,         label: "Historique",           sub: "Timeline de tes déplacements",           color: "#3b82f6" },
             { href: "/leaderboard",  icon: <Trophy className="w-4 h-4" />,          label: "Classement",           sub: "Voir ton rang",                          color: "#f5a623" },
             { href: "/how-it-works", icon: <span className="text-sm">💡</span>,     label: "Comment ça marche",    sub: "Guide & FAQ",                            color: "#3b82f6" },

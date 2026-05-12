@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin } from "lucide-react";
+import CancelSpotButton from "./CancelSpotButton";
 
 const STATUS_COLORS: Record<string, string> = {
   available: "bg-green-100 text-green-700",
@@ -68,7 +69,7 @@ export default async function AdminSpotsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {["Adresse", "Partageur", "Prix", "Véhicule", "Options", "Expire", "Statut"].map((h) => (
+                {["Adresse", "Partageur", "Prix", "Véhicule", "Options", "Expire", "Statut", ""].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">
                     {h}
                   </th>
@@ -103,6 +104,9 @@ export default async function AdminSpotsPage() {
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_COLORS[s.status] ?? ""}`}>
                       {s.status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {s.status === "available" && <CancelSpotButton spotId={s.id} />}
                   </td>
                 </tr>
               ))}
