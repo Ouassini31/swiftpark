@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
 function getSupabase() {
@@ -24,6 +25,13 @@ function initVapid() {
 
 export async function POST(req: NextRequest) {
   try {
+    // Vérifier que l'appelant est un utilisateur authentifié
+    const supabaseAuth = await createServerClient();
+    const { data: { user } } = await supabaseAuth.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
     const body = await req.json();
     const { user_id, title, message, url = "/map" } = body;
 
