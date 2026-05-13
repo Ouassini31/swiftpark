@@ -15,7 +15,6 @@ import ShareSpotModal from "@/components/parking/ShareSpotModal";
 import SearchSpotSheet from "@/components/map/SearchSpotSheet";
 import MapHeader from "@/components/map/MapHeader";
 import { type MapFilters, DEFAULT_FILTERS } from "@/components/map/FilterBar";
-import Onboarding from "@/components/onboarding/Onboarding";
 import DepartBanner, { type DepartResult } from "@/components/parking/DepartBanner";
 import InstallBanner from "@/components/ui/InstallBanner";
 import NotifPromptBanner from "@/components/ui/NotifPromptBanner";
@@ -32,7 +31,6 @@ const CATEGORY_ORDER = ["citadine", "compacte", "berline", "suv", "grand"];
 export default function MapClient() {
   const [showShare, setShowShare]   = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [showOb, setShowOb]         = useState(false);
   const [filters, setFilters]       = useState<MapFilters>(DEFAULT_FILTERS);
 
   // Point 3 — CyclePrompt (A→B)
@@ -54,13 +52,6 @@ export default function MapClient() {
   useGeolocation();
   useRealtimeSpots();
   usePushNotifications(profile?.id ?? null);
-
-  // Onboarding
-  useEffect(() => {
-    if (typeof window !== "undefined" && !localStorage.getItem("sp_ob")) {
-      setShowOb(true);
-    }
-  }, []);
 
   // URL params: centre carte + open share
   useEffect(() => {
@@ -154,8 +145,6 @@ export default function MapClient() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[var(--bg,#f5f5f2)]">
-      {showOb && <Onboarding onDone={() => setShowOb(false)} />}
-
       <MapView filteredSpots={filteredSpots} />
 
       <MapHeader
