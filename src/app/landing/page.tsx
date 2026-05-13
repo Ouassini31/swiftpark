@@ -88,7 +88,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/auth/register"
+            <Link href="/onboarding"
               className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-white text-[#22956b] font-black rounded-2xl text-sm shadow-xl active:scale-95 transition">
               <Zap className="w-4 h-4 fill-[#22956b] text-[#22956b]" />
               Commencer gratuitement
@@ -227,10 +227,10 @@ export default function LandingPage() {
         <div className="max-w-xl mx-auto text-center">
           <h2 className="text-2xl font-black text-gray-900 mb-3">Prêt à arrêter de tourner en rond ?</h2>
           <p className="text-gray-500 text-sm mb-6">Rejoins la communauté SwiftPark — gratuit, sans engagement.</p>
-          <Link href="/auth/register"
+          <Link href="/onboarding"
             className="inline-flex items-center gap-2 px-8 py-4 bg-[#22956b] text-white font-black rounded-2xl text-sm shadow-lg shadow-[#22956b]/30 active:scale-95 transition">
             <Zap className="w-4 h-4 fill-white" />
-            Créer mon compte gratuitement
+            Rejoindre le mouvement
           </Link>
           <p className="mt-3 text-xs text-gray-400">5 SwiftCoins offerts · Aucune carte bancaire requise</p>
         </div>
@@ -246,7 +246,7 @@ export default function LandingPage() {
           <div className="flex gap-5 text-xs text-gray-400">
             <Link href="/legal"        className="hover:text-gray-700 transition">Mentions légales</Link>
             <Link href="/how-it-works" className="hover:text-gray-700 transition">Comment ça marche</Link>
-            <Link href="/auth/register" className="hover:text-gray-700 transition">S'inscrire</Link>
+            <Link href="/onboarding" className="hover:text-gray-700 transition">S'inscrire</Link>
           </div>
           <p className="text-[11px] text-gray-400">© {new Date().getFullYear()} SwiftPark</p>
         </div>
