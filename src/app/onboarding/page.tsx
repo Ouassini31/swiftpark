@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const DM = "var(--font-dm-sans), system-ui, sans-serif";
 
@@ -24,8 +25,19 @@ export default function OnboardingPage() {
       className="min-h-screen flex flex-col"
       style={{ background: "#0a0a0a", fontFamily: DM }}
     >
+      {/* Nav minimaliste */}
+      <div className="flex items-center justify-between px-6 pt-10">
+        <div className="flex items-center gap-2">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#22956b"/><text x="14" y="20" textAnchor="middle" fill="white" fontSize="16" fontWeight="900" fontFamily="system-ui,sans-serif">P</text></svg>
+          <span style={{ color: "white", fontWeight: 900, fontSize: 15, letterSpacing: "-0.01em" }}>Swift<span style={{ color: "#22956b" }}>Park</span></span>
+        </div>
+        <Link href="/auth/login" style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, fontWeight: 500 }}>
+          Connexion
+        </Link>
+      </div>
+
       {/* Hero */}
-      <div className="flex-1 flex flex-col justify-center px-6 pt-16 pb-6">
+      <div className="flex-1 flex flex-col justify-center px-6 pt-8 pb-6">
 
         {/* Tag */}
         <div className="inline-flex items-center gap-2 self-start bg-white/10 border border-white/15 rounded-full px-3 py-1.5 mb-8">
@@ -101,6 +113,12 @@ export default function OnboardingPage() {
         </button>
         <p className="text-center text-white/30 text-xs mt-3" style={{ fontWeight: 300 }}>
           Gratuit · Aucun abonnement
+        </p>
+        <p className="text-center mt-4" style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
+          Déjà un compte ?{" "}
+          <Link href="/auth/login" style={{ color: "#22956b", fontWeight: 600 }}>
+            Se connecter →
+          </Link>
         </p>
       </div>
     </div>
