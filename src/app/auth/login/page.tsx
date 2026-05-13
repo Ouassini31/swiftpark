@@ -102,11 +102,8 @@ export default function LoginPage() {
 
       {/* Branding */}
       <div className="text-center mb-7">
-        <div className="w-[68px] h-[68px] bg-[#22956b] rounded-[20px] flex items-center justify-center mx-auto mb-3 shadow-[0_6px_24px_rgba(34,149,107,.4)]">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
+        <div className="flex justify-center mb-3">
+          <svg width="56" height="56" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#22956b"/><text x="14" y="20" textAnchor="middle" fill="white" fontSize="16" fontWeight="900" fontFamily="system-ui,sans-serif">P</text></svg>
         </div>
         <h1 className="text-[26px] font-black text-[var(--t,#111)]">SwiftPark</h1>
         <p className="text-[13px] text-[var(--t2,#555)] mt-1">L'info en temps réel · Trouve ta place</p>

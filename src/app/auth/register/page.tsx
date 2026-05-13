@@ -80,11 +80,14 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "linear-gradient(160deg,#e8f5ef 0%,#f5f5f2 60%)" }}>
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <div className="text-4xl font-black text-brand-600">SwiftPark</div>
-          <p className="mt-2 text-sm text-gray-500">Créez votre compte et recevez 50 SwiftCoins</p>
+          <div className="flex justify-center mb-2">
+            <svg width="52" height="52" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#22956b"/><text x="14" y="20" textAnchor="middle" fill="white" fontSize="16" fontWeight="900" fontFamily="system-ui,sans-serif">P</text></svg>
+          </div>
+          <div className="text-[22px] font-black text-gray-900">SwiftPark</div>
+          <p className="mt-1 text-sm text-gray-500">Créez votre compte · 5 SwiftCoins offerts</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
