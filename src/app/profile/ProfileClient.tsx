@@ -120,12 +120,11 @@ export default function ProfileClient({
     <div className="min-h-screen pb-28" style={{ background: "#f5f5f2", fontFamily: DM }}>
       <style>{`
         @media (min-width: 768px) {
-          .profile-wrap { max-width: 480px; margin: 0 auto; box-shadow: 0 0 0 1px #e8e8e2; min-height: 100vh; background: #f5f5f2; }
-          .profile-banner { height: 180px !important; }
+          .profile-banner { height: 200px !important; }
+          .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         }
       `}</style>
 
-      <div className="profile-wrap">
       {/* ── Photo de voiture — pleine largeur ── */}
       <div className="profile-banner relative w-full" style={{ height: 260 }}>
 
@@ -226,7 +225,8 @@ export default function ProfileClient({
         ))}
       </div>
 
-      <div className="px-4 space-y-3 mt-4">
+      <div className="px-4 mt-4">
+      <div className="profile-grid space-y-3" style={{ gap: 16 }}>
 
         {/* ── Badges ── */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -343,8 +343,8 @@ export default function ProfileClient({
         {/* Email en bas, discret */}
         <p className="text-center text-[11px] text-gray-400 pb-2">{email}</p>
 
-      </div>
-      </div>{/* /profile-wrap */}
+      </div>{/* /profile-grid */}
+      </div>{/* /px-4 */}
 
       {/* ── Modal confirmation suppression ── */}
       {showDeleteConfirm && (
