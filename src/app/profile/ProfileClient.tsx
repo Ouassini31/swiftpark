@@ -118,9 +118,16 @@ export default function ProfileClient({
 
   return (
     <div className="min-h-screen pb-28" style={{ background: "#f5f5f2", fontFamily: DM }}>
+      <style>{`
+        @media (min-width: 768px) {
+          .profile-wrap { max-width: 480px; margin: 0 auto; box-shadow: 0 0 0 1px #e8e8e2; min-height: 100vh; background: #f5f5f2; }
+          .profile-banner { height: 180px !important; }
+        }
+      `}</style>
 
+      <div className="profile-wrap">
       {/* ── Photo de voiture — pleine largeur ── */}
-      <div className="relative w-full" style={{ height: 260 }}>
+      <div className="profile-banner relative w-full" style={{ height: 260 }}>
 
         {/* Image ou placeholder */}
         {avatarUrl ? (
@@ -337,6 +344,7 @@ export default function ProfileClient({
         <p className="text-center text-[11px] text-gray-400 pb-2">{email}</p>
 
       </div>
+      </div>{/* /profile-wrap */}
 
       {/* ── Modal confirmation suppression ── */}
       {showDeleteConfirm && (

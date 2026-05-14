@@ -57,6 +57,10 @@ export default function VehicleSelector({ userId, initial }: Props) {
   const [lengthCm, setLengthCm] = useState<number>(initial.length_cm ?? 420);
   const [category, setCategory] = useState<string>(initial.category ?? "compacte");
 
+  /* Mode édition : fermé par défaut si un véhicule est déjà enregistré */
+  const hasVehicle = !!(initial.make && initial.model);
+  const [editing, setEditing] = useState(!hasVehicle);
+
   /* UI */
   const [loadingSpecs, setLoadingSpecs] = useState(false);
   const [autoDetected, setAutoDetected] = useState(false);
@@ -124,12 +128,61 @@ export default function VehicleSelector({ userId, initial }: Props) {
       .eq("id", userId);
 
     if (error) { toast.error("Erreur lors de la sauvegarde"); }
-    else { setSaved(true); toast.success("Véhicule mis à jour ✓"); setTimeout(() => setSaved(false), 3000); }
+    else { setSaved(true); toast.success("Véhicule mis à jour ✓"); setTimeout(() => { setSaved(false); setEditing(false); }, 1500); }
     setSaving(false);
   }
 
+  const colorInfo = COLORS.find(c => c.value === color);
+  const catInfo   = CATEGORIES.find(c => c.value === category);
+
   return (
     <section className="space-y-3">
+
+      {/* ── Résumé véhicule (mode lecture) ── */}
+      {!editing && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-black text-gray-900">🚗 Mon véhicule</p>
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-xl transition"
+              style={{ background: "#e8f5ef", color: "#22956b" }}
+            >
+              Modifier
+            </button>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Véhicule</span>
+              <span className="text-sm font-bold text-gray-900">{make} {model}{year ? ` (${year})` : ""}</span>
+            </div>
+            {color && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Couleur</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full border border-gray-200" style={{ background: colorInfo?.hex }} />
+                  <span className="text-sm font-bold text-gray-900">{colorInfo?.label}</span>
+                </div>
+              </div>
+            )}
+            {category && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Gabarit</span>
+                <span className="text-sm font-bold text-gray-900">{catInfo?.label} · {lengthCm} cm</span>
+              </div>
+            )}
+            {plate && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Plaque</span>
+                <span className="text-sm font-black tracking-widest text-gray-900">{plate}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Formulaire complet (mode édition) ── */}
+      {editing && (<>
 
       {/* ── Marque + Modèle + Année ── */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
@@ -305,6 +358,17 @@ export default function VehicleSelector({ userId, initial }: Props) {
           "Enregistrer mon véhicule"
         )}
       </button>
+
+      {hasVehicle && (
+        <button
+          onClick={() => setEditing(false)}
+          className="w-full py-3 text-sm font-semibold text-gray-400 active:text-gray-600 transition"
+        >
+          Annuler
+        </button>
+      )}
+
+      </>)} {/* /editing */}
     </section>
   );
 }
