@@ -102,20 +102,60 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Stats CO₂ ───────────────────────────────────────────── */}
-      <section className="py-14 px-5 bg-[#0a0a0a]">
-        <div className="max-w-xl mx-auto text-center mb-8">
-          <p className="text-[#22956b] text-xs font-bold uppercase tracking-widest mb-2">Le problème que l'on résout</p>
-          <h2 className="text-2xl font-black text-white leading-tight">La recherche de parking,<br />un fléau silencieux</h2>
-        </div>
-        <div className="max-w-xl mx-auto grid grid-cols-3 gap-3">
-          {STATS.map((s) => (
-            <div key={s.value} className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-              <p className="text-2xl font-black text-[#22956b]">{s.value}</p>
-              <p className="text-white text-xs font-bold mt-1">{s.label}</p>
-              <p className="text-gray-500 text-[10px] mt-0.5 leading-tight">{s.sub}</p>
-            </div>
-          ))}
+      {/* ── Impact CO₂ ──────────────────────────────────────────── */}
+      <section className="px-5 py-16 bg-[#0a0a0a]">
+        <div className="max-w-xl mx-auto">
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-3 py-1.5 mb-7">
+            <span className="w-2 h-2 rounded-full bg-[#22956b]" />
+            <span className="text-white/60 text-xs font-semibold tracking-widest uppercase">La mission SwiftPark</span>
+          </div>
+
+          {/* Headline choc */}
+          <h2 className="text-white font-black leading-tight mb-4" style={{ fontSize: "clamp(28px,5vw,40px)", letterSpacing: "-0.03em" }}>
+            À Paris, 1 voiture sur 3<br />
+            en circulation{" "}
+            <span style={{ color: "#22956b" }}>cherche juste à se garer.</span>
+          </h2>
+
+          <p className="text-white/40 text-sm leading-relaxed mb-10" style={{ fontWeight: 300 }}>
+            Du CO₂ inutile. Des bouchons évitables. Du stress quotidien.<br />Et du temps perdu — chaque jour, par millions de conducteurs.
+          </p>
+
+          {/* Stats */}
+          <div className="space-y-3 mb-10">
+            {[
+              { value: "30%",    label: "de la circulation urbaine",  sub: "générée par la recherche de parking" },
+              { value: "20 min", label: "perdues par trajet",          sub: "à tourner en rond en moyenne" },
+              { value: "1M t",   label: "de CO₂ inutiles / an",       sub: "rien qu'en France — source ADEME" },
+            ].map(({ value, label, sub }) => (
+              <div key={value} className="flex items-center gap-5 rounded-2xl px-5 py-4"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <span className="font-black shrink-0" style={{ fontSize: 28, color: "#22956b", letterSpacing: "-0.04em", minWidth: 80 }}>
+                  {value}
+                </span>
+                <div>
+                  <p className="text-white text-sm font-semibold">{label}</p>
+                  <p className="text-white/40 text-xs mt-0.5" style={{ fontWeight: 300 }}>{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Notre réponse */}
+          <div className="rounded-2xl px-5 py-4"
+            style={{ background: "linear-gradient(135deg,rgba(34,149,107,.15),rgba(8,80,65,.15))", border: "1px solid rgba(34,149,107,.3)" }}>
+            <p className="text-[#22956b] text-xs font-black uppercase tracking-widest mb-2">Notre réponse</p>
+            <p className="text-white text-sm leading-relaxed" style={{ fontWeight: 300 }}>
+              SwiftPark connecte les conducteurs qui{" "}
+              <span className="text-white font-semibold">signalent leur départ</span>{" "}
+              avec ceux qui{" "}
+              <span className="text-white font-semibold">cherchent une place</span>.{" "}
+              Moins de tours inutiles. Moins de CO₂. Une information récompensée.
+            </p>
+          </div>
+
         </div>
       </section>
 
