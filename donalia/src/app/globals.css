@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   DONALIA — Design system (univers « Chaleureux » validé)
+   Tokens + composants repris de donalia.css / screens.css (.uA).
+   Polices fournies par next/font : --font-fraunces / --font-mulish.
+   ============================================================ */
+:root {
+  --paper:#F4EEE3;  --bg2:#EFE7D8;  --ink:#16403B;  --ink2:#1E5A52;
+  --green:#4E9C7F;  --green-deep:#3C7E66;  --green-soft:rgba(78,156,127,.14);
+  --accent:#C2A14E;  --accent-soft:#FBF6E9;  --accent-ink:#8A6F22;
+  --card:#FFFFFF;  --line:#E7DECB;  --muted:#7A7264;  --text:#23201A;  --field:#FCFAF4;
+
+  --ff-display: var(--font-fraunces), Georgia, serif;
+  --ff-text: var(--font-mulish), system-ui, sans-serif;
+  --wd:600; --ls:-.01em;
+
+  --r-card:18px; --r-btn:14px;
+  --hero-bg:radial-gradient(125% 100% at 50% -15%, #FBF7EE 0%, #F4EEE3 60%);
+  --shadow:0 1px 2px rgba(22,64,59,.04), 0 8px 26px rgba(22,64,59,.07);
+  --shadow-lg:0 10px 40px rgba(22,64,59,.13);
+}
+
+html, body { background: var(--paper); color: var(--text); }
+body { font-family: var(--ff-text); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* ---------- TYPO ---------- */
+.t-display{ font-family:var(--ff-display); font-weight:var(--wd); letter-spacing:var(--ls); color:var(--ink); line-height:1.08; }
+.t-h2{ font-family:var(--ff-display); font-weight:var(--wd); letter-spacing:var(--ls); color:var(--ink); line-height:1.16; }
+.t-eyebrow{ font-family:var(--ff-text); font-weight:700; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); }
+.t-body{ font-family:var(--ff-text); font-weight:400; line-height:1.6; color:var(--text); }
+.t-muted{ color:var(--muted); }
+.t-quote{ font-family:var(--ff-display); font-style:italic; font-weight:500; color:var(--ink); }
+
+/* ---------- WORDMARK (Donalia + point doré) ---------- */
+.dn-word{ font-family:var(--ff-display); font-weight:var(--wd); letter-spacing:var(--ls); color:var(--ink);
+  line-height:1; display:inline-flex; align-items:baseline; }
+.dn-word .dot{ width:.16em; height:.16em; border-radius:50%; background:var(--accent);
+  display:inline-block; align-self:flex-end; margin-bottom:.14em; margin-left:.1em; }
+
+/* ---------- BOUTONS ---------- */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:9px; white-space:nowrap;
+  font-family:var(--ff-text); font-weight:700; border-radius:14px; transition:transform .12s, background .15s, box-shadow .15s;
+  padding:14px 22px; font-size:15px; cursor:pointer; }
+.btn:active{ transform:translateY(1px); }
+.btn--primary{ background:var(--ink); color:#fff; box-shadow:var(--shadow); }
+.btn--primary:hover{ background:var(--ink2); }
+.btn--green{ background:var(--green); color:#fff; }
+.btn--ghost{ background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1.6px var(--line); }
+.btn--ghost:hover{ background:rgba(0,0,0,.025); }
+.btn--lg{ padding:17px 28px; font-size:16px; }
+.btn--sm{ padding:10px 16px; font-size:13.5px; }
+.btn--block{ width:100%; }
+.btn:disabled{ background:var(--line); color:var(--muted); cursor:not-allowed; }
+
+/* ---------- HEADER / FOOTER ---------- */
+.hdr{ display:flex; align-items:center; justify-content:space-between; gap:30px; padding:16px 0; }
+.hdr__nav{ display:flex; align-items:center; gap:26px; flex:0 0 auto; }
+.hdr__nav a{ font-weight:600; font-size:14.5px; color:var(--text); opacity:.82; white-space:nowrap; }
+.hdr__nav a:hover{ opacity:1; color:var(--ink); }
+.hdr__right{ display:flex; align-items:center; gap:14px; }
+.brand{ display:flex; align-items:center; gap:11px; }
+
+/* ---------- HERO ---------- */
+.hero{ background:var(--hero-bg); }
+.pill{ display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:13.5px; line-height:1; white-space:nowrap;
+  padding:10px 15px; border-radius:999px; background:var(--card); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line); }
+.pill svg{ width:16px; height:16px; color:var(--green-deep); }
+.pill--accent{ background:var(--accent-soft); color:var(--accent-ink); box-shadow:inset 0 0 0 1px rgba(0,0,0,.05); }
+.pill--accent svg{ color:var(--accent-ink); }
+
+/* ---------- FUNNEL (3 étapes) ---------- */
+.funnel{ display:grid; gap:16px; }
+.fstep{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-card); padding:24px; position:relative; box-shadow:var(--shadow); }
+.fstep__n{ width:34px; height:34px; border-radius:11px; background:var(--ink); color:#fff;
+  font-weight:800; font-size:15px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+.fstep__n.is-green{ background:var(--green); }
+.fstep__n.is-accent{ background:var(--accent); color:#3a2f12; }
+.fstep h4{ font-family:var(--ff-display); font-weight:var(--wd); font-size:18px; color:var(--ink); margin-bottom:7px; letter-spacing:var(--ls); }
+.fstep p{ font-size:13.5px; line-height:1.55; color:var(--muted); }
+
+/* ---------- REASSURANCE ---------- */
+.reassure{ display:flex; gap:26px; flex-wrap:wrap; }
+.reassure__item{ display:flex; align-items:center; gap:11px; font-weight:600; font-size:14px; color:var(--ink); }
+.reassure__ic{ width:38px; height:38px; border-radius:11px; background:var(--green-soft); color:var(--green-deep);
+  display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+.reassure__ic svg{ width:20px; height:20px; }
+
+/* ---------- CARTE BESOIN ---------- */
+.need{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-card); overflow:hidden;
+  box-shadow:var(--shadow); display:flex; flex-direction:column; transition:transform .15s, box-shadow .15s; }
+.need:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+.need__media{ aspect-ratio:16/10; background:linear-gradient(160deg, var(--bg2), var(--paper));
+  display:flex; align-items:center; justify-content:center; color:var(--ink); position:relative; border-bottom:1px solid var(--line); }
+.need__media svg{ width:44%; height:44%; opacity:.9; }
+.need__cat{ position:absolute; top:12px; left:12px; display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.88); backdrop-filter:blur(4px);
+  padding:6px 11px 6px 8px; border-radius:999px; font-weight:700; font-size:11.5px; color:var(--ink2); box-shadow:inset 0 0 0 1px var(--line); }
+.need__cat svg{ width:15px; height:15px; }
+.need__body{ padding:16px 17px 17px; display:flex; flex-direction:column; flex:1; }
+.need__title{ font-family:var(--ff-text); font-weight:800; font-size:15.5px; line-height:1.25; color:var(--text); margin-bottom:10px; }
+.need__foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
+.need__amt b{ font-family:var(--ff-text); font-weight:800; font-size:17px; color:var(--ink); }
+.need__amt span{ font-size:12px; color:var(--muted); }
+
+/* ---------- BADGE DE TROU ---------- */
+.trou{ display:inline-flex; align-items:center; gap:7px; padding:6px 12px 6px 9px; border-radius:999px;
+  font-weight:700; font-size:12px; line-height:1; }
+.trou::before{ content:''; width:7px; height:7px; border-radius:50%; background:currentColor; flex:0 0 auto; }
+.trou--reste{ background:var(--accent-soft); color:var(--accent-ink); }
+.trou--hors{ background:var(--green-soft); color:var(--green-deep); }
+.trou--avance{ background:rgba(200,90,70,.12); color:#b4503c; }
+.trou--droit{ background:rgba(63,124,168,.13); color:#3568a0; }
+.trou-line{ font-size:12.5px; line-height:1.45; color:var(--muted); margin-top:8px; }
+
+/* ---------- JAUGE BARRE (signature = panse du D qui se remplit) ---------- */
+.gauge{ position:relative; height:9px; border-radius:999px; background:var(--bg2); overflow:hidden; box-shadow:inset 0 0 0 1px var(--line); }
+.gauge__fill{ position:absolute; inset:0 auto 0 0; border-radius:999px; background:linear-gradient(90deg, var(--green), var(--green-deep)); }
+.gauge__fill--full{ background:linear-gradient(90deg, var(--green) 0%, var(--green-deep) 70%, var(--accent) 100%); }
+.gauge-row{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; font-size:12.5px; margin-bottom:7px; }
+.gauge-row b,.gauge-row span{ white-space:nowrap; }
+.gauge-row b{ font-weight:800; color:var(--ink); font-size:13.5px; }
+.gauge-row span{ color:var(--muted); }
+
+/* ---------- JAUGE ARC (signature, écho de la panse du D) ---------- */
+.arc{ position:relative; flex:0 0 auto; }
+.arc__lbl{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.arc__pct{ font-family:var(--ff-text); font-weight:800; color:var(--ink); line-height:1; }
+.arc__cap{ font-weight:700; font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+
+/* ---------- BANDEAU REÇU FISCAL ---------- */
+.recu{ background:var(--accent-soft); border:1.5px dashed var(--accent); border-radius:14px; padding:13px 16px; display:flex; gap:13px; align-items:center; }
+.recu__ic{ flex:0 0 auto; width:38px; height:38px; border-radius:10px; background:#fff; color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 0 1px rgba(0,0,0,.05); }
+.recu__ic svg{ width:21px; height:21px; }
+.recu h5{ font-family:var(--ff-text); font-weight:800; font-size:13.5px; color:var(--accent-ink); margin-bottom:2px; }
+.recu p{ font-size:12px; line-height:1.4; color:var(--accent-ink); opacity:.85; }
+
+/* ---------- BANNIÈRE ESTIMATION (non masquable) ---------- */
+.estim{ display:flex; gap:11px; align-items:flex-start; background:rgba(63,124,168,.08); border-radius:12px; padding:12px 14px; }
+.estim svg{ width:17px; height:17px; color:var(--ink2); flex:0 0 auto; margin-top:1px; }
+.estim p{ font-size:12px; line-height:1.45; color:var(--ink2); }
+.estim b{ font-weight:800; }
+
+/* ---------- SECTION HEAD / CHIPS ---------- */
+.sec-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:22px; }
+.sec-head p{ font-size:14px; color:var(--muted); margin-top:6px; }
+.link-arrow{ display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:14px; color:var(--ink2); }
+.link-arrow svg{ width:17px; height:17px; }
+.chips{ display:flex; gap:9px; flex-wrap:wrap; }
+.chip{ font-weight:700; font-size:13px; padding:9px 15px; border-radius:999px; background:var(--card); color:var(--ink2); box-shadow:inset 0 0 0 1px var(--line); white-space:nowrap; cursor:pointer; }
+.chip--on{ background:var(--ink); color:#fff; box-shadow:none; }
+
+/* ---------- FOOTER ---------- */
+.ft{ background:var(--ink); color:#fff; }
+.ft a{ color:rgba(255,255,255,.75); font-size:14px; }
+.ft a:hover{ color:#fff; }
+
+/* ============================================================
+   PAGE BESOIN
+   ============================================================ */
+.crumb{ display:flex; align-items:center; gap:9px; font-size:13px; color:var(--muted); font-weight:600; }
+.detail-media{ aspect-ratio:4/3; border-radius:20px; background:linear-gradient(160deg, var(--bg2), var(--paper));
+  display:flex; align-items:center; justify-content:center; color:var(--ink); border:1px solid var(--line); position:relative; box-shadow:var(--shadow); }
+.detail-media>svg{ width:42%; height:42%; }
+.detail-amt b{ font-family:var(--ff-display); font-weight:var(--wd); letter-spacing:var(--ls); font-size:32px; color:var(--ink); }
+.detail-amt span{ font-size:14px; color:var(--muted); }
+.give-note{ font-size:12.5px; line-height:1.5; color:var(--muted); text-align:center; }
+.give-note b{ color:var(--ink); font-weight:800; }
+
+/* frise transparence (droits d'abord) */
+.frise{ display:flex; align-items:stretch; gap:10px; flex-wrap:wrap; }
+.frise__step{ flex:1 1 120px; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:12px 13px; display:flex; flex-direction:column; gap:8px; }
+.frise__step.is-on{ background:var(--green-soft); border-color:transparent; }
+.frise__step.is-res{ background:var(--accent-soft); border-color:transparent; }
+.frise__top{ display:flex; align-items:center; gap:7px; font-weight:800; font-size:12.5px; color:var(--ink); line-height:1.15; }
+.frise__chk{ width:18px; height:18px; border-radius:50%; background:var(--green); color:#fff; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+.frise__chk svg{ width:11px; height:11px; }
+.frise__amt{ font-weight:800; font-size:15px; color:var(--green-deep); }
+.frise__step.is-res .frise__amt{ color:var(--accent-ink); }
+
+/* ============================================================
+   DON / PAIEMENT
+   ============================================================ */
+.flabel{ display:block; font-weight:700; font-size:13px; color:var(--ink); margin-bottom:9px; }
+.amounts{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.amount{ font-family:var(--ff-text); font-weight:800; font-size:18px; padding:15px 0; text-align:center; border-radius:12px;
+  color:var(--ink); background:var(--card); box-shadow:inset 0 0 0 1.5px var(--line); transition:.12s; cursor:pointer; }
+.amount--on{ background:var(--ink); color:#fff; box-shadow:none; }
+.field{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-radius:12px; background:var(--card); box-shadow:inset 0 0 0 1.5px var(--line); }
+.field input{ border:none; outline:none; font-family:var(--ff-text); font-weight:600; font-size:15px; color:var(--text); background:transparent; width:100%; }
+.field input::placeholder{ color:var(--muted); }
+.field svg{ width:18px; height:18px; color:var(--muted); flex:0 0 auto; }
+.field__cur{ font-weight:800; font-size:17px; color:var(--ink); }
+.seg{ display:flex; gap:8px; }
+.seg button{ flex:1; font-family:var(--ff-text); font-weight:700; font-size:14px; padding:12px 0; border-radius:11px; color:var(--ink2); background:var(--card); box-shadow:inset 0 0 0 1.5px var(--line); }
+.seg button.is-on{ background:var(--ink2); color:#fff; box-shadow:none; }
+.tip-note{ font-size:11.5px; line-height:1.5; color:var(--muted); }
+.tip-note b{ color:var(--ink); font-weight:800; }
+.pay-secure{ display:flex; align-items:center; justify-content:center; gap:7px; font-size:11.5px; color:var(--muted); font-weight:600; }
+.pay-secure svg{ width:14px; height:14px; }
+.recap{ display:flex; gap:13px; align-items:center; background:var(--field); border:1px solid var(--line); border-radius:14px; padding:13px 14px; }
+.recap__ic{ width:50px; height:50px; border-radius:12px; background:linear-gradient(160deg,var(--bg2),var(--paper)); flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:var(--ink); }
+.recap__ic svg{ width:30px; height:30px; }
+.recap h5{ font-family:var(--ff-text); font-weight:800; font-size:13.5px; color:var(--text); }
+.recap p{ font-size:12px; color:var(--muted); margin-top:3px; }
+
+/* ---------- CONFIDENTIEL (back-office) ---------- */
+.confid{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--accent-ink);
+  background:var(--accent-soft); padding:6px 12px; border-radius:999px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.04); white-space:nowrap; }
+.confid svg{ width:13px; height:13px; }
+
+/* ---------- helpers admin (conservés) ---------- */
+@layer components {
+  .input { @apply w-full rounded-xl border border-line bg-[color:var(--field)] px-3 py-2.5 text-sm outline-none focus:border-ink-2; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink-2 disabled:opacity-60; }
+}
