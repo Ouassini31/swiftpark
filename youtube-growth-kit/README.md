@@ -14,6 +14,7 @@
 | `04-planning.md` | Un planning de publication simple à tenir pour un ado |
 | `05-checklist-video.md` | La checklist à cocher avant de publier chaque vidéo |
 | `06-outil-analyse.md` | (Optionnel) Petit outil pour suivre les stats via l'API YouTube officielle |
+| `07-mecaniques-clips.md` | Quels clips poster : grille de tri, format « psycho/forfait », mécaniques & titres |
 
 ## 🎯 L'idée principale à retenir
 
