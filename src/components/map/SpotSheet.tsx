@@ -118,11 +118,8 @@ export default function SpotSheet() {
     setSharerVehicle(null);
     const supabase = createClient();
     supabase
-      .from("profiles" as never)
-      .select("vehicle_make, vehicle_model, vehicle_color, vehicle_length_cm, vehicle_category, spots_shared, full_name, username, avatar_url")
-      .eq("id", selectedSpot.sharer_id)
-      .single()
-      .then(({ data }: { data: unknown }) => setSharerVehicle((data as SharerVehicle) ?? null));
+      .rpc("profils_publics", { p_ids: [selectedSpot.sharer_id] })
+      .then(({ data }: { data: SharerVehicle[] | null }) => setSharerVehicle(data?.[0] ?? null));
   }, [selectedSpot?.id]);
 
   if (!selectedSpot) return null;
@@ -170,14 +167,24 @@ export default function SpotSheet() {
         expires_at:     new Date(Date.now() + 10 * 60 * 1000).toISOString(),
       }).select().single();
     if (error) { toast.error("Erreur lors de l'achat d'info"); setLoading(false); return; }
-    await supabase.rpc("process_coin_transaction", {
+    // Le paiement retire aussi la place de la carte : un autre conducteur peut être passé avant
+    const { error: payError } = await supabase.rpc("process_coin_transaction", {
       p_user_id:        profile.id,
       p_amount:         -selectedSpot!.coin_price,
       p_type:           "spend",
       p_description:    `Info achetée · ${selectedSpot!.address ?? "Place"}`,
       p_reservation_id: reservation.id,
     });
-    await supabase.from("parking_spots").update({ status: "reserved" }).eq("id", selectedSpot!.id);
+    if (payError) {
+      await supabase
+        .from("reservations")
+        .update({ status: "cancelled", cancelled_at: new Date().toISOString(), cancel_reason: "paiement_refuse" })
+        .eq("id", reservation.id);
+      toast.error(payError.code === "42501" ? "Cette info n'est plus disponible" : "Erreur lors de l'achat d'info");
+      selectSpot(null);
+      setLoading(false);
+      return;
+    }
     notifyUser({
       user_id:        selectedSpot!.sharer_id,
       type:           "reservation_received",

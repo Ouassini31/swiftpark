@@ -37,22 +37,18 @@ export default function RatingModal({ reservationId, spotAddress, sharerId, onCl
     if (!profile) return;
     setLoading(true);
     const supabase = createClient();
-    await supabase.from("ratings").insert({
+    // La note moyenne est recalculée par le déclencheur on_rating_created
+    const { error } = await supabase.from("ratings").insert({
       reservation_id: reservationId,
       rater_id: profile.id,
       rated_id: sharerId,
-      stars, tags,
-      comment: comment.trim() || null,
-    }).then(() => {});
-    // Mettre à jour la note moyenne du partageur
-    const { data: existing } = await supabase
-      .from("profiles").select("rating, rating_count").eq("id", sharerId).single();
-    if (existing) {
-      const count = (existing.rating_count ?? 0) + 1;
-      const avg   = ((existing.rating ?? 0) * (count - 1) + stars) / count;
-      await supabase.from("profiles")
-        .update({ rating: Math.round(avg * 10) / 10, rating_count: count })
-        .eq("id", sharerId);
+      score: stars,
+      comment: [tags.join(", "), comment.trim()].filter(Boolean).join(" · ") || null,
+    });
+    if (error) {
+      toast.error(error.code === "23505" ? "Tu as déjà noté cet échange" : "Impossible d'enregistrer ton avis");
+      setLoading(false);
+      return;
     }
     toast.success(stars >= 4 ? "Merci pour ton retour ! ⭐" : "Retour enregistré");
     onClose();

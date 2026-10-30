@@ -39,6 +39,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 });
     }
 
+    // On ne notifie que soi-même, ou l'autre conducteur d'un échange auquel on participe
+    if (user_id !== user.id) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: exchange } = body.reservation_id ? await (supabaseAuth as any)
+        .from("reservations")
+        .select("finder_id, sharer_id")
+        .eq("id", body.reservation_id)
+        .maybeSingle() : { data: null };
+
+      if (!exchange || (exchange.finder_id !== user_id && exchange.sharer_id !== user_id)) {
+        return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+      }
+    }
+
     const supabase = getSupabase();
 
     // Insérer la notification en base (in-app)

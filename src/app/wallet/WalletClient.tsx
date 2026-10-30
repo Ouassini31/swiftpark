@@ -25,7 +25,7 @@ interface CoinPack {
 }
 
 const TX_ICONS: Record<string, string> = {
-  earn: "💰", spend: "🔑", commission: "🏦", refund: "↩️", bonus: "🎁", purchase: "💳",
+  earn: "💰", spend: "🔑", commission: "🏦", refund: "↩️", bonus: "🎁", recharge: "💳", withdraw: "💸",
 };
 
 // Packs par défaut si la table n'existe pas encore en base
@@ -333,7 +333,7 @@ function TransactionRow({ tx }: { tx: Transaction }) {
           <p className="text-sm font-semibold text-gray-800 truncate">{tx.description}</p>
           {isPositive && !isWithdrawable && (
             <span className="shrink-0 text-[9px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">
-              BONUS
+              {tx.type === "bonus" ? "BONUS" : "NON RETIRABLE"}
             </span>
           )}
         </div>

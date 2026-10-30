@@ -85,47 +85,17 @@ export default function GpsValidation({
       return;
     }
 
-    // Mettre à jour les flags GPS sur la place
-    const updateField =
-      role === "sharer"
-        ? { sharer_validated: true, sharer_gps_lat: pos.coords.latitude, sharer_gps_lng: pos.coords.longitude }
-        : { finder_validated: true, finder_gps_lat: pos.coords.latitude, finder_gps_lng: pos.coords.longitude };
+    // La position, la fin de l'échange et le paiement du partageur se font d'un seul coup côté serveur
+    const { error } = await supabase.rpc("valider_position", {
+      p_reservation_id: reservation.id,
+      p_lat:            pos.coords.latitude,
+      p_lng:            pos.coords.longitude,
+    });
 
-    await supabase.from("parking_spots").update(updateField).eq("id", reservation.spot_id);
-
-    // Vérifier si les deux ont validé → compléter la réservation
-    const { data: spot } = await supabase
-      .from("parking_spots")
-      .select("sharer_validated, finder_validated")
-      .eq("id", reservation.spot_id)
-      .single();
-
-    if (spot?.sharer_validated && spot?.finder_validated) {
-      // Guard : mettre à jour uniquement si la réservation est encore "reserved"
-      // (évite le double-paiement si DepartBanner a déjà complété la réservation)
-      const { data: updatedRes } = await supabase
-        .from("reservations")
-        .update({ status: "completed", completed_at: new Date().toISOString() })
-        .eq("id", reservation.id)
-        .eq("status", "reserved") // ← atomique : ne touche rien si déjà completed
-        .select("id")
-        .maybeSingle();
-
-      if (updatedRes) {
-        // Seulement si c'est nous qui avons transitionné vers "completed"
-        await supabase
-          .from("parking_spots")
-          .update({ status: "completed", validation_status: "validated", validated_at: new Date().toISOString() })
-          .eq("id", reservation.spot_id);
-
-        await supabase.rpc("process_coin_transaction", {
-          p_user_id:        reservation.sharer_id,
-          p_amount:         reservation.sharer_receive,
-          p_type:           "earn",
-          p_description:    `Départ signalé — ${reservation.sharer_receive} SC`,
-          p_reservation_id: reservation.id,
-        });
-      }
+    if (error) {
+      setState("failed");
+      toast.error("Impossible de valider ta position");
+      return;
     }
 
     setState("success");

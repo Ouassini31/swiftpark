@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClientAny as createClient } from "@/lib/supabase/client";
 import { CheckCircle, XCircle, Loader2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,15 +19,15 @@ export default function WithdrawalActions({
 
   async function update(newStatus: "completed" | "rejected") {
     setLoading(newStatus === "completed" ? "approve" : "reject");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = createClient() as any;
-    const { error } = await supabase
-      .from("withdrawal_requests")
-      .update({ status: newStatus, processed_at: new Date().toISOString() })
-      .eq("id", id);
+    const res = await fetch("/api/admin/withdrawals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: newStatus }),
+    });
+    const data = await res.json().catch(() => ({ error: "Erreur réseau" }));
 
-    if (error) {
-      toast.error("Erreur : " + error.message);
+    if (!res.ok) {
+      toast.error("Erreur : " + (data.error ?? "inconnue"));
     } else {
       setDone(newStatus);
       toast.success(newStatus === "completed" ? "Virement marqué comme effectué" : "Demande rejetée");

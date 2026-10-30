@@ -41,6 +41,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    const coinsInt = parseInt(coins, 10);
+    // Une pièce achetée se dépense mais ne se retire pas (même règle que la recharge de l'app)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: creditError } = await (supabase as any).rpc("process_coin_transaction", {
+      p_user_id:          user_id,
+      p_amount:           coinsInt,
+      p_type:             "recharge",
+      p_description:      `Achat pack ${coinsInt} SC`,
+      p_reservation_id:   null,
+      p_metadata:         { stripe_session_id: session.id },
+      p_is_withdrawable:  false,
+    });
+
+    // 23505 : Stripe renvoie un événement déjà crédité (index unique sur stripe_session_id)
+    if (creditError && creditError.code !== "23505") {
+      console.error("[stripe/webhook] Credit error", creditError);
+      return NextResponse.json({ error: "Credit failed" }, { status: 500 });
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any)
       .from("stripe_orders")
@@ -50,16 +69,6 @@ export async function POST(req: NextRequest) {
         paid_at:               new Date().toISOString(),
       })
       .eq("stripe_session_id", session.id);
-
-    const coinsInt = parseInt(coins, 10);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).rpc("process_coin_transaction", {
-      p_user_id:        user_id,
-      p_amount:         coinsInt,
-      p_type:           "earn",
-      p_description:    `Achat pack ${coinsInt} SC`,
-      p_reservation_id: null,
-    });
 
     console.log(`[stripe/webhook] ✅ +${coinsInt} SC → user ${user_id}`);
   }

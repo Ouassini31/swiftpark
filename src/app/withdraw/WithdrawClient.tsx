@@ -31,10 +31,9 @@ function validateIban(raw: string): string | null {
 }
 
 export default function WithdrawClient({
-  profile, userId,
+  profile,
 }: {
-  profile: { coin_balance: number; full_name: string; username: string } | null;
-  userId: string;
+  profile: { coin_balance: number; bonus_balance: number; full_name: string; username: string } | null;
 }) {
   const [ibanRaw, setIbanRaw]   = useState("");           // stored without spaces
   const [name, setName]         = useState(profile?.full_name ?? profile?.username ?? "");
@@ -43,7 +42,8 @@ export default function WithdrawClient({
   const [done, setDone]         = useState(false);
   const [withdrawnAmount, setWithdrawnAmount] = useState(0);
 
-  const balance     = profile?.coin_balance ?? 0;
+  // Seules les pièces gagnées se retirent : ni les offertes, ni les rechargées
+  const balance     = Math.max(0, (profile?.coin_balance ?? 0) - (profile?.bonus_balance ?? 0));
   const canWithdraw = balance >= MIN_WITHDRAW;
 
   /* Live IBAN input: strip spaces → uppercase → validate on blur */
@@ -71,7 +71,6 @@ export default function WithdrawClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId,
           iban: ibanRaw,
           name: name.trim(),
           amount: balance,

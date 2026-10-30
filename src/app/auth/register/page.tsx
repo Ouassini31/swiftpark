@@ -69,7 +69,7 @@ function RegisterForm() {
         await fetch("/api/referral", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: user.id, referral_code: form.referral_code.trim() }),
+          body: JSON.stringify({ referral_code: form.referral_code.trim() }),
         });
       }
     }

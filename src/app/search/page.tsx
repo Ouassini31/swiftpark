@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { profilsPublics } from "@/lib/profilsPublics";
 import SearchClient from "./SearchClient";
 
 export default async function SearchPage({
@@ -14,7 +15,7 @@ export default async function SearchPage({
   // Construire la requête avec filtres
   let query = supabase
     .from("parking_spots")
-    .select("*, profiles!parking_spots_sharer_id_fkey(username, full_name, rating)")
+    .select("*")
     .eq("status", "available")
     .gt("expires_at", new Date().toISOString())
     .order("coin_price", { ascending: true });
@@ -30,6 +31,14 @@ export default async function SearchPage({
   }
 
   const { data: spots } = await query.limit(50);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows = (spots ?? []) as any[];
+  const profils = await profilsPublics(supabase, rows.map((s) => s.sharer_id));
 
-  return <SearchClient spots={spots ?? []} initialFilters={searchParams} />;
+  return (
+    <SearchClient
+      spots={rows.map((s) => ({ ...s, profiles: profils[s.sharer_id] ?? null }))}
+      initialFilters={searchParams}
+    />
+  );
 }

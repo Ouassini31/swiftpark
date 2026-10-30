@@ -29,9 +29,8 @@ async function notify(userId: string, title: string, message: string, url: strin
     user_id: userId,
     type:    "pre_departure",
     title,
-    message,
-    url,
-    read:    false,
+    body:    message,
+    data:    { url },
   });
 
   // Appel vers la fonction send-push si elle existe
@@ -112,9 +111,9 @@ Deno.serve(async () => {
   }
 
   /* ── 3. Auto-cancel si sharer n'a pas confirmé et place expirée ── */
-  // (géré par expire-spots + cancel-reservation ; ici on notifie les B)
-  // On cherche les réservations annulées dans la dernière minute sans refund notif
-  const oneMinAgo = new Date(now.getTime() - 60 * 1000).toISOString();
+  // (géré par expirer_echanges en base ; ici on notifie les B)
+  // On cherche les réservations annulées récemment sans refund notif : 5 min au cas où un passage du cron saute
+  const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1000).toISOString();
 
   const { data: cancelledRes } = await supabase
     .from("reservations")
@@ -124,7 +123,7 @@ Deno.serve(async () => {
     `)
     .eq("status", "cancelled")
     .eq("cancel_reason", "timeout")
-    .gte("cancelled_at", oneMinAgo)
+    .gte("cancelled_at", fiveMinAgo)
     .is("finder_notified_at", null);
 
   for (const res of (cancelledRes ?? [])) {
@@ -132,7 +131,7 @@ Deno.serve(async () => {
     await notify(
       res.finder_id,
       "↩️ Remboursement automatique",
-      `Le partageur n'a pas confirmé à temps. Tes ${res.coin_amount} SC ont été remboursés. Cherche une autre place !`,
+      `L'échange n'a pas été validé à temps. Tes ${res.coin_amount} SC ont été remboursés. Cherche une autre place !`,
       "/map"
     );
 

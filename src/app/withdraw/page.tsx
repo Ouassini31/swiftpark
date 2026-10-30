@@ -12,9 +12,9 @@ export default async function WithdrawPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await (supabase as any)
     .from("profiles")
-    .select("coin_balance, full_name, username")
+    .select("coin_balance, bonus_balance, full_name, username")
     .eq("id", user.id)
     .single();
 
-  return <WithdrawClient profile={profile} userId={user.id} />;
+  return <WithdrawClient profile={profile} />;
 }

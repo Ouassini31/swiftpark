@@ -86,16 +86,10 @@ export default function ReservationsClient({
                   onTrack={() => setTrackingTarget(r)}
                   onCancel={async () => {
                     const supabase = createClient();
-                    const res = await fetch(
-                      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/cancel-reservation`,
-                      {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ reservation_id: r.id, user_id: currentUserId }),
-                      }
-                    );
-                    const data = await res.json();
-                    if (data.success) {
+                    const { data } = await supabase.functions.invoke("cancel-reservation", {
+                      body: { reservation_id: r.id },
+                    });
+                    if (data?.success) {
                       toast.success(`Annulé — ${data.refund_amount} SC remboursés`);
                       window.location.reload();
                     } else {
@@ -166,7 +160,7 @@ export default function ReservationsClient({
         <RatingModal
           reservationId={ratingTarget.id}
           spotAddress={ratingTarget.parking_spots?.address ?? null}
-          sharerId={ratingTarget.sharer_id}
+          sharerId={ratingTarget.sharer_id === currentUserId ? ratingTarget.finder_id : ratingTarget.sharer_id}
           onClose={() => setRatingTarget(null)}
         />
       )}
