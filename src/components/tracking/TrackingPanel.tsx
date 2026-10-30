@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useRealtimeTracking } from "@/hooks/useRealtimeTracking";
 import { haversineDistance } from "@/lib/utils";
 import { createClientAny as createClient } from "@/lib/supabase/client";
-import { notifyUser } from "@/lib/notify";
+import { pousserDepart } from "@/lib/notify";
 import { useMapStore } from "@/store/useMapStore";
 import { toast } from "sonner";
 
@@ -144,52 +144,34 @@ export default function TrackingPanel({
       .maybeSingle();
 
     if (reservation) {
-      await supabase
-        .from("reservations")
-        .update({ status: "completed", completed_at: new Date().toISOString() })
-        .eq("id", reservation.id);
-
-      await supabase.rpc("process_coin_transaction", {
-        p_user_id:        profile.id,
-        p_amount:         reservation.sharer_receive,
-        p_type:           "earn",
-        p_description:    `Départ signalé · ${reservation.sharer_receive} SC`,
+      // Le serveur retient le paiement : il part au terme du délai, sauf si la place est déclarée occupée
+      const { error } = await supabase.rpc("valider_position", {
         p_reservation_id: reservation.id,
+        p_lat:            lat,
+        p_lng:            lng,
       });
+      if (error) {
+        toast.error("Impossible de signaler ton départ");
+        setDeparting(false);
+        return;
+      }
 
-      notifyUser({
-        user_id:        reservation.finder_id,
-        type:           "spot_validated",
-        title:          "🏃 Il part maintenant !",
-        message:        "La place se libère ! Dépêche-toi d'arriver.",
-        reservation_id: reservation.id,
-        url:            "/map",
-      });
-
-      notifyUser({
-        user_id:        profile.id,
-        type:           "payment_received",
-        title:          `✅ +${reservation.sharer_receive} SC reçus !`,
-        message:        "Tes SwiftCoins sont crédités.",
-        reservation_id: reservation.id,
-        url:            "/wallet",
-      });
-
-      toast.success(`✅ +${reservation.sharer_receive} SC crédités !`);
+      pousserDepart(reservation);
+      toast.success(`Départ signalé. Tes ${reservation.sharer_receive} SC arrivent d'ici quelques minutes.`);
+    } else {
+      // Marquer la place comme complétée
+      await supabase
+        .from("parking_spots")
+        .update({
+          status:           "completed",
+          sharer_validated: true,
+          sharer_gps_lat:   lat,
+          sharer_gps_lng:   lng,
+          validated_at:     new Date().toISOString(),
+        })
+        .eq("sharer_id", profile.id)
+        .in("status", ["available", "reserved"]);
     }
-
-    // Marquer la place comme complétée
-    await supabase
-      .from("parking_spots")
-      .update({
-        status:           "completed",
-        sharer_validated: true,
-        sharer_gps_lat:   lat,
-        sharer_gps_lng:   lng,
-        validated_at:     new Date().toISOString(),
-      })
-      .eq("sharer_id", profile.id)
-      .in("status", ["available", "reserved"]);
 
     setDeparting(false);
     onClose?.();

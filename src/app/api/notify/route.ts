@@ -55,16 +55,18 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabase();
 
-    // Insérer la notification en base (in-app)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("notifications").insert({
-      user_id,
-      type:  body.type ?? "info",
-      title,
-      body:  message,
-      data:  body.data ?? {},
-      reservation_id: body.reservation_id ?? null,
-    });
+    // Insérer la notification en base (in-app), sauf si le serveur l'a déjà écrite
+    if (!body.push_seulement) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from("notifications").insert({
+        user_id,
+        type:  body.type ?? "info",
+        title,
+        body:  message,
+        data:  body.data ?? {},
+        reservation_id: body.reservation_id ?? null,
+      });
+    }
 
     // Push notification si VAPID configuré
     if (!initVapid()) {

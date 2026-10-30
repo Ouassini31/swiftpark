@@ -5,6 +5,7 @@ import { MapPin, CheckCircle, XCircle, Loader } from "lucide-react";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
 import { haversineDistance, GPS_VALIDATION_RADIUS_M } from "@/lib/utils";
+import { pousserDepart } from "@/lib/notify";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
 import GPSSuccess from "@/components/map/GPSSuccess";
@@ -85,7 +86,7 @@ export default function GpsValidation({
       return;
     }
 
-    // La position, la fin de l'échange et le paiement du partageur se font d'un seul coup côté serveur
+    // Partageur : signale son départ, le paiement est retenu. Chercheur : confirme la place, le partageur est payé.
     const { error } = await supabase.rpc("valider_position", {
       p_reservation_id: reservation.id,
       p_lat:            pos.coords.latitude,
@@ -110,6 +111,7 @@ export default function GpsValidation({
     }
 
     // Sharer : callback direct (DepartBanner gère son propre feedback)
+    pousserDepart(reservation);
     onValidated();
   }
 
@@ -139,7 +141,7 @@ export default function GpsValidation({
         <h3 className="text-lg font-black text-gray-900">Validation GPS</h3>
         <p className="text-sm text-gray-500 mt-1">
           {role === "sharer"
-            ? "Confirmez que vous êtes bien sur place pour finaliser"
+            ? "Confirmez que vous êtes sur place et que vous partez"
             : "Confirmez votre arrivée sur place"}
         </p>
       </div>
