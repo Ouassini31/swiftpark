@@ -41,6 +41,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    // « completed » ne veut pas dire payé : session sans encaissement, moyen de paiement différé
+    if (session.payment_status !== "paid") {
+      return NextResponse.json({ ok: true });
+    }
+
     const coinsInt = parseInt(coins, 10);
     // Une pièce achetée se dépense mais ne se retire pas (même règle que la recharge de l'app)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
