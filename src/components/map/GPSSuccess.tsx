@@ -108,7 +108,7 @@ export default function GPSSuccess({
         }}>
           {isFinder
             ? (isFirst ? "Première place trouvée !" : "Place trouvée !")
-            : (isFirst ? "Première contribution validée !" : "Position confirmée")}
+            : (isFirst ? "Première contribution signalée !" : "Départ signalé")}
         </h1>
 
         <p style={{
@@ -120,9 +120,7 @@ export default function GPSSuccess({
             ? (isFirst
                 ? `Bienvenue dans SwiftPark ! Tu es maintenant à ${street}.`
                 : `Tu es bien arrivé à ${street}. Profite de ta place !`)
-            : (isFirst
-                ? `Bienvenue dans la communauté SwiftPark. Tu es maintenant ${street}.`
-                : `Vous êtes bien arrivé à ${street}. Votre récompense est créditée.`)}
+            : `${isFirst ? "Bienvenue dans la communauté SwiftPark. " : ""}Ta récompense arrive d'ici quelques minutes, sauf si la place est déclarée occupée.`}
         </p>
 
         {/* Reward block — sharer only */}
@@ -132,7 +130,7 @@ export default function GPSSuccess({
             style={{ background: "#f0faf6", maxWidth: 280 }}
           >
             <p style={{ ...label, color: T.accent, textAlign: "center" }}>
-              {isFirst ? "Bienvenue bonus" : "Récompense"}
+              Récompense à venir
             </p>
             <div className="mt-2 flex items-baseline gap-2">
               <span style={{

@@ -156,7 +156,7 @@ function NotifRow({ notif, onDelete, onClose }: {
   onDelete: () => void;
   onClose: () => void;
 }) {
-  const url = (notif as { url?: string }).url;
+  const url = (notif.data as { url?: string } | null)?.url;
 
   function handleClick() {
     if (url) { onClose(); window.location.href = url; }

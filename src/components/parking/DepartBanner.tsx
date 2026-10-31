@@ -5,7 +5,7 @@ import { LogOut, CheckCircle, Loader2 } from "lucide-react";
 import { createClientAny as createClient } from "@/lib/supabase/client";
 import { useMapStore } from "@/store/useMapStore";
 import { haversineDistance, GPS_VALIDATION_RADIUS_M } from "@/lib/utils";
-import { notifyUser } from "@/lib/notify";
+import { pousserDepart } from "@/lib/notify";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
 
@@ -109,57 +109,36 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
         is_valid: dist <= GPS_VALIDATION_RADIUS_M * 3, // 3× pour tolérance urbaine
       });
 
-      // Compléter la réservation et payer
-      await supabase
-        .from("reservations")
-        .update({ status: "completed", completed_at: new Date().toISOString() })
-        .eq("id", reservation.id);
-
-      await supabase.rpc("process_coin_transaction", {
-        p_user_id: profile.id,
-        p_amount: reservation.sharer_receive,
-        p_type: "earn",
-        p_description: `Départ signalé · ${reservation.sharer_receive} SC`,
+      // Le serveur retient le paiement : il part au terme du délai, sauf si la place est déclarée occupée
+      const { error } = await supabase.rpc("valider_position", {
         p_reservation_id: reservation.id,
+        p_lat:            lat,
+        p_lng:            lng,
       });
+      if (error) {
+        toast.error("Impossible de signaler ton départ");
+        setLocating(false);
+        return;
+      }
 
-      // Notifier le Finder que le Sharer part
-      notifyUser({
-        user_id:        reservation.finder_id,
-        type:           "spot_validated",
-        title:          "🏃 Il part maintenant !",
-        message:        `La place se libère ! Dépêche-toi d'arriver.`,
-        reservation_id: reservation.id,
-        url:            "/map",
-      });
-
-      // Notifier le Sharer de ses gains
-      notifyUser({
-        user_id:        profile.id,
-        type:           "payment_received",
-        title:          `✅ +${reservation.sharer_receive} SC reçus !`,
-        message:        `Merci d'avoir signalé ton départ. Tes SwiftCoins sont crédités.`,
-        reservation_id: reservation.id,
-        url:            "/wallet",
-      });
-
-      toast.success(`✅ Bravo ! Tu gagnes ${reservation.sharer_receive} SC`);
+      pousserDepart(reservation);
+      toast.success(`Départ signalé. Tes ${reservation.sharer_receive} SC arrivent d'ici quelques minutes.`);
     } else {
       toast(`Place libérée — pas de finder trouvé cette fois 🙁`, { icon: "📍" });
-    }
 
-    // Marquer la place comme complétée + sharer_confirmed pour stopper les nudges
-    await supabase
-      .from("parking_spots")
-      .update({
-        status:           "completed",
-        sharer_validated: true,
-        sharer_confirmed: true,   // stoppe les nudges pré-départ
-        sharer_gps_lat:   lat,
-        sharer_gps_lng:   lng,
-        validated_at:     new Date().toISOString(),
-      })
-      .eq("id", spot.id);
+      // Marquer la place comme complétée + sharer_confirmed pour stopper les nudges
+      await supabase
+        .from("parking_spots")
+        .update({
+          status:           "completed",
+          sharer_validated: true,
+          sharer_confirmed: true,   // stoppe les nudges pré-départ
+          sharer_gps_lat:   lat,
+          sharer_gps_lng:   lng,
+          validated_at:     new Date().toISOString(),
+        })
+        .eq("id", spot.id);
+    }
 
     setStep("done");
     setTimeout(() => {
@@ -203,7 +182,7 @@ export default function DepartBanner({ spot, onDone }: DepartBannerProps) {
 
             <div className="bg-gray-50 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
               <span className="text-xs text-gray-500">Récompense estimée</span>
-              <span className="font-black text-[#22956b]">⚡ {spot.coin_price} SC</span>
+              <span className="font-black text-[#22956b]">⚡ {earningSC} SC</span>
             </div>
 
             <div className="flex gap-2.5">

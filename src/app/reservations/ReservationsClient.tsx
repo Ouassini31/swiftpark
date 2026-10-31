@@ -84,6 +84,24 @@ export default function ReservationsClient({
                   currentUserId={currentUserId}
                   onValidate={() => setGpsTarget(r)}
                   onTrack={() => setTrackingTarget(r)}
+                  onOccupied={async () => {
+                    if (!window.confirm("La place est bien occupée ? L'échange sera annulé et le partageur ne sera pas payé.")) return;
+                    const pos = await new Promise<GeolocationPosition | null>((resolve) =>
+                      navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), {
+                        enableHighAccuracy: true, timeout: 15000,
+                      })
+                    );
+                    if (!pos) { toast.error("Position GPS indisponible"); return; }
+                    const supabase = createClient();
+                    const { data, error } = await supabase.rpc("declarer_place_occupee", {
+                      p_reservation_id: r.id,
+                      p_lat:            pos.coords.latitude,
+                      p_lng:            pos.coords.longitude,
+                    });
+                    if (error) { toast.error(error.message); return; }
+                    toast.success(`Place déclarée occupée — ${data} SC remboursés`);
+                    window.location.reload();
+                  }}
                   onCancel={async () => {
                     const supabase = createClient();
                     const { data } = await supabase.functions.invoke("cancel-reservation", {
@@ -170,25 +188,35 @@ export default function ReservationsClient({
 
 /* ─── Active Card ─────────────────────────────────────────── */
 function ActiveCard({
-  reservation, currentUserId, onValidate, onTrack, onCancel,
+  reservation, currentUserId, onValidate, onTrack, onOccupied, onCancel,
 }: {
   reservation: ReservationWithJoins;
   currentUserId: string;
   onValidate: () => void;
   onTrack: () => void;
+  onOccupied: () => void;
   onCancel: () => void;
 }) {
-  const { formatted, isExpired, isUrgent } = useCountdown(reservation.expires_at);
+  const departSignale = !!reservation.depart_signale_at;
+  const { formatted, isExpired, isUrgent } = useCountdown(
+    departSignale ? reservation.paiement_prevu_at : reservation.expires_at
+  );
   const isFinder = reservation.finder_id === currentUserId;
   const other = isFinder ? reservation.sharer : reservation.finder;
+
+  const timerLabel = !departSignale
+    ? (isExpired ? "Expiré" : "Expire dans")
+    : isExpired
+      ? "Paiement en cours"
+      : isFinder ? "Place occupée ? Il reste" : "Paiement dans";
 
   return (
     <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
       {/* Timer */}
       <div className={`px-4 py-2 flex items-center justify-between text-xs font-bold ${
-        isExpired ? "bg-red-500 text-white" : isUrgent ? "bg-orange-100 text-orange-700" : "bg-brand-50 text-brand-700"
+        isExpired && !departSignale ? "bg-red-500 text-white" : isUrgent ? "bg-orange-100 text-orange-700" : "bg-brand-50 text-brand-700"
       }`}>
-        <span>{isExpired ? "Expiré" : "Expire dans"}</span>
+        <span>{timerLabel}</span>
         <span className="text-base font-black">{formatted}</span>
       </div>
 
@@ -222,8 +250,33 @@ function ActiveCard({
           </span>
         </div>
 
+        {/* Départ signalé : le paiement est retenu jusqu'à la fin du compte à rebours */}
+        {departSignale && (
+          <p className="text-xs text-gray-600 bg-gray-50 rounded-xl px-3 py-2">
+            {isFinder
+              ? "Le partageur a signalé son départ. Si la place est occupée, dis-le avant la fin du compte à rebours : tu seras remboursé."
+              : `Départ signalé. Tes ${reservation.sharer_receive} SC arrivent à la fin du compte à rebours, sauf si le conducteur déclare la place occupée.`}
+          </p>
+        )}
+
         {/* Actions */}
-        {!isExpired && (
+        {!isExpired && departSignale && isFinder && (
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onOccupied}
+              className="flex-1 py-2.5 border border-red-200 text-red-600 text-sm font-semibold rounded-xl hover:bg-red-50"
+            >
+              🚫 Place occupée
+            </button>
+            <button
+              onClick={onValidate}
+              className="flex-1 py-2.5 bg-brand-600 text-white text-sm font-bold rounded-xl hover:bg-brand-700"
+            >
+              ✅ Place libre
+            </button>
+          </div>
+        )}
+        {!isExpired && !departSignale && (
           <div className="space-y-2 pt-1">
             <button
               onClick={onTrack}
@@ -242,7 +295,7 @@ function ActiveCard({
                 onClick={onValidate}
                 className="flex-[2] py-2.5 bg-brand-600 text-white text-sm font-bold rounded-xl hover:bg-brand-700"
               >
-                ✅ Valider ma position
+                {isFinder ? "✅ Valider ma position" : "🚗 Je pars"}
               </button>
             </div>
           </div>
@@ -268,16 +321,18 @@ function HistoryCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold">
           <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${cfg.color}`}>
-            {cfg.icon} {cfg.label}
+            {cfg.icon} {reservation.cancel_reason === "place_occupee" ? "Place occupée" : cfg.label}
           </span>
           <span className="text-gray-400">
             {isFinder ? "Finder" : "Sharer"}
           </span>
         </div>
         <span className={`text-sm font-black ${
-          isFinder ? "text-red-500" : "text-brand-600"
+          reservation.status !== "completed" ? "text-gray-400" : isFinder ? "text-red-500" : "text-brand-600"
         }`}>
-          {isFinder ? `-${reservation.coin_amount}` : `+${reservation.sharer_receive}`} SC
+          {reservation.status !== "completed"
+            ? "—"
+            : `${isFinder ? `-${reservation.coin_amount}` : `+${reservation.sharer_receive}`} SC`}
         </span>
       </div>
 
