@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
-import { createClient as createServerClient } from "@/lib/supabase/server";
+import { appelant } from "@/lib/supabase/appelant";
 import type { Database } from "@/types/database";
 
 function getSupabase() {
@@ -26,8 +26,7 @@ function initVapid() {
 export async function POST(req: NextRequest) {
   try {
     // Vérifier que l'appelant est un utilisateur authentifié
-    const supabaseAuth = await createServerClient();
-    const { data: { user } } = await supabaseAuth.auth.getUser();
+    const { client: supabaseAuth, user } = await appelant(req);
     if (!user) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
@@ -55,16 +54,18 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabase();
 
-    // Insérer la notification en base (in-app)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("notifications").insert({
-      user_id,
-      type:  body.type ?? "info",
-      title,
-      body:  message,
-      data:  body.data ?? {},
-      reservation_id: body.reservation_id ?? null,
-    });
+    // Insérer la notification en base (in-app), sauf si le serveur l'a déjà écrite
+    if (!body.push_seulement) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from("notifications").insert({
+        user_id,
+        type:  body.type ?? "info",
+        title,
+        body:  message,
+        data:  body.data ?? {},
+        reservation_id: body.reservation_id ?? null,
+      });
+    }
 
     // Push notification si VAPID configuré
     if (!initVapid()) {

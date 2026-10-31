@@ -1,13 +1,12 @@
-import { NextResponse } from "next/server";
-import { createClient as createServerClient } from "@/lib/supabase/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { appelant } from "@/lib/supabase/appelant";
 import { createClient } from "@supabase/supabase-js";
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
   // Vérifier que l'utilisateur est authentifié
-  const supabase = await createServerClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const { user } = await appelant(req);
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
